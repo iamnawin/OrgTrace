@@ -1,0 +1,32 @@
+{
+  "name": "@orgtrace/salesforce-api",
+  "version": "0.1.0",
+  "description": "Salesforce Tooling API, REST API, and MetadataComponentDependency helpers for OrgTrace",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run --passWithNoTests",
+    "lint": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@orgtrace/core": "workspace:*"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.10",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

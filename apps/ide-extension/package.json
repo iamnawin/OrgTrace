@@ -1,0 +1,63 @@
+{
+  "name": "orgtrace-ide-companion",
+  "displayName": "OrgTrace IDE Companion",
+  "description": "Salesforce metadata dependency and change impact analysis inside your IDE",
+  "version": "0.1.0",
+  "publisher": "ZeroOriginsAI",
+  "private": true,
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "workspaceContains:**/sfdx-project.json"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "orgtrace.analyzeComponent",
+        "title": "OrgTrace: Analyze Component Dependency"
+      },
+      {
+        "command": "orgtrace.rescan",
+        "title": "OrgTrace: Rescan"
+      },
+      {
+        "command": "orgtrace.exportMarkdown",
+        "title": "OrgTrace: Export Impact Report"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "orgtrace.analyzeComponent",
+          "group": "orgtrace"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.js && pnpm run build:webview",
+    "build:webview": "vite build --config webview/vite.config.ts",
+    "dev": "node esbuild.js --watch",
+    "dev:webview": "vite --config webview/vite.config.ts",
+    "lint": "tsc --noEmit",
+    "clean": "rimraf dist webview/dist",
+    "package": "vsce package"
+  },
+  "dependencies": {
+    "@orgtrace/core": "workspace:*",
+    "@orgtrace/scanner": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "esbuild": "^0.24.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "rimraf": "^5.0.10",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
+  }
+}

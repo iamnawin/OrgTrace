@@ -1,0 +1,32 @@
+{
+  "name": "@orgtrace/scanner",
+  "version": "0.1.0",
+  "description": "Local SFDX project scanner for OrgTrace — Node.js only",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run --passWithNoTests",
+    "lint": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@orgtrace/core": "workspace:*",
+    "fast-glob": "^3.3.3",
+    "fast-xml-parser": "^4.5.1"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.10",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}
