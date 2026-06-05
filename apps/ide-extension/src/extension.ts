@@ -1,32 +1,28 @@
 import * as vscode from 'vscode';
 
+import { analyzeComponentCommand } from './commands/analyzeComponentCommand';
+import { exportReportCommand } from './commands/exportReportCommand';
+import { rescanCommand } from './commands/rescanCommand';
 import { InMemoryCacheStore } from './cache/InMemoryCacheStore';
-
-const cache = new InMemoryCacheStore();
+import { OrgTraceService } from './OrgTraceService';
+import { WebviewProvider } from './WebviewProvider';
 
 export function activate(context: vscode.ExtensionContext): void {
-  context.subscriptions.push(
-    vscode.commands.registerCommand('orgtrace.analyzeComponent', async () => {
-      const editor = vscode.window.activeTextEditor;
-      if (!editor) {
-        await vscode.window.showWarningMessage('Open a Salesforce metadata file before running OrgTrace.');
-        return;
-      }
+  const cache = new InMemoryCacheStore();
+  const service = new OrgTraceService(cache);
+  const webviewProvider = new WebviewProvider(context.extensionUri);
 
-      await vscode.window.showInformationMessage(
-        `OrgTrace analysis host is ready for ${editor.document.fileName}.`,
-      );
-    }),
-    vscode.commands.registerCommand('orgtrace.rescan', async () => {
-      cache.clear();
-      await vscode.window.showInformationMessage('OrgTrace cache cleared.');
-    }),
-    vscode.commands.registerCommand('orgtrace.exportMarkdown', async () => {
-      await vscode.window.showWarningMessage('OrgTrace export is not wired yet.');
-    }),
+  context.subscriptions.push(
+    vscode.commands.registerCommand('orgtrace.analyzeComponent', () =>
+      analyzeComponentCommand(service, webviewProvider),
+    ),
+    vscode.commands.registerCommand('orgtrace.rescan', () =>
+      rescanCommand(service),
+    ),
+    vscode.commands.registerCommand('orgtrace.exportMarkdown', () =>
+      exportReportCommand(service),
+    ),
   );
 }
 
-export function deactivate(): void {
-  cache.clear();
-}
+export function deactivate(): void {}

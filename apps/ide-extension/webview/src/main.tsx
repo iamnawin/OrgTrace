@@ -1,24 +1,33 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import type { DependencyResult } from '@orgtrace/core';
+import { App } from '../../src/webview/App';
 
 import './styles.css';
 
-function App(): JSX.Element {
-  return (
-    <main className="shell">
-      <header>
-        <p className="eyebrow">OrgTrace</p>
-        <h1>Impact analysis</h1>
-      </header>
-      <section className="panel">
-        <p>Select a Salesforce metadata component to inspect local references and change risk.</p>
-      </section>
-    </main>
-  );
+interface WebviewState {
+  result?: DependencyResult;
+}
+
+declare global {
+  interface Window {
+    __ORGTRACE_INITIAL_RESULT__?: DependencyResult;
+  }
 }
 
 const root = document.getElementById('root');
 
 if (root) {
-  createRoot(root).render(<App />);
+  const reactRoot = createRoot(root);
+  const render = (state: WebviewState): void => {
+    reactRoot.render(<App result={state.result} />);
+  };
+
+  render({ result: window.__ORGTRACE_INITIAL_RESULT__ });
+
+  window.addEventListener('message', (event: MessageEvent) => {
+    if (event.data?.type === 'result') {
+      render({ result: event.data.result as DependencyResult });
+    }
+  });
 }
