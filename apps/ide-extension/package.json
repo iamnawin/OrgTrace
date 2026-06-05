@@ -17,7 +17,7 @@
     "commands": [
       {
         "command": "orgtrace.analyzeComponent",
-        "title": "OrgTrace: Analyze Component Dependency"
+        "title": "OrgTrace: Analyze Component"
       },
       {
         "command": "orgtrace.rescan",
@@ -42,6 +42,7 @@
     "build:webview": "vite build --config webview/vite.config.ts",
     "dev": "node esbuild.js --watch",
     "dev:webview": "vite --config webview/vite.config.ts",
+    "test": "vitest run --passWithNoTests",
     "lint": "tsc --noEmit",
     "clean": "rimraf dist webview/dist",
     "package": "vsce package"
@@ -58,6 +59,7 @@
     "react-dom": "^18.3.1",
     "rimraf": "^5.0.10",
     "typescript": "^5.7.3",
-    "vite": "^6.0.7"
+    "vite": "^6.0.7",
+    "vitest": "^2.1.8"
   }
 }

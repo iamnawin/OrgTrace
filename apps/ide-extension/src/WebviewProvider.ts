@@ -3,13 +3,19 @@ import type { DependencyResult } from '@orgtrace/core';
 
 export class WebviewProvider {
   private panel: vscode.WebviewPanel | undefined;
+  private exportHandler: (() => void | Promise<void>) | undefined;
 
   constructor(private readonly extensionUri: vscode.Uri) {}
 
   async showResult(result: DependencyResult): Promise<void> {
     const panel = this.getPanel();
     panel.webview.html = await this.getHtml(panel.webview, result);
+    void panel.webview.postMessage({ type: 'result', result });
     panel.reveal(vscode.ViewColumn.Beside);
+  }
+
+  onExport(handler: () => void | Promise<void>): void {
+    this.exportHandler = handler;
   }
 
   private getPanel(): vscode.WebviewPanel {
@@ -28,6 +34,11 @@ export class WebviewProvider {
     );
     this.panel.onDidDispose(() => {
       this.panel = undefined;
+    });
+    this.panel.webview.onDidReceiveMessage((message: { type?: string }) => {
+      if (message.type === 'exportMarkdown') {
+        void this.exportHandler?.();
+      }
     });
 
     return this.panel;

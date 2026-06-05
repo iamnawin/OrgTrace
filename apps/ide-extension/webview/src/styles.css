@@ -38,3 +38,29 @@ h1 {
   line-height: 1.5;
   margin: 0;
 }
+
+table {
+  border-collapse: collapse;
+  margin: 8px 0 16px;
+  width: 100%;
+}
+
+td,
+th {
+  border-bottom: 1px solid var(--vscode-panel-border, #d6dae0);
+  padding: 6px;
+  text-align: left;
+}
+
+.risk-badge {
+  display: inline-block;
+  margin-top: 8px;
+}
+
+.warning {
+  color: var(--vscode-editorWarning-foreground, #9a6700);
+}
+
+.error {
+  color: var(--vscode-editorError-foreground, #c42b1c);
+}

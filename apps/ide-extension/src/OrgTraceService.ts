@@ -4,6 +4,7 @@ import { calculateRisk } from '@orgtrace/core';
 import { scan } from '@orgtrace/scanner';
 
 import type { CacheStore } from './cache/CacheStore';
+import { generateImpactMarkdown } from './reportMarkdown';
 
 export interface AnalyzeComponentInput {
   projectPath: string;
@@ -61,47 +62,26 @@ export class OrgTraceService {
     return this.lastResult;
   }
 
-  async exportLastResult(): Promise<void> {
+  async exportLastResult(workspacePath?: string): Promise<vscode.Uri | undefined> {
     if (!this.lastResult) {
       await vscode.window.showWarningMessage('Run OrgTrace analysis before exporting a report.');
-      return;
+      return undefined;
     }
 
-    const uri = await vscode.window.showSaveDialog({
-      defaultUri: vscode.Uri.file(`${this.lastResult.target.apiName}-impact-report.md`),
-      filters: {
-        Markdown: ['md'],
-      },
-    });
-
-    if (!uri) return;
+    const safeApiName = this.lastResult.target.apiName.replace(/[^\w.-]+/g, '_');
+    const baseUri = workspacePath
+      ? vscode.Uri.file(workspacePath)
+      : vscode.workspace.workspaceFolders?.[0]?.uri;
+    const uri = vscode.Uri.joinPath(
+      baseUri ?? vscode.Uri.file(process.cwd()),
+      `${safeApiName}-impact-report.md`,
+    );
 
     await vscode.workspace.fs.writeFile(
       uri,
-      Buffer.from(this.toMarkdown(this.lastResult), 'utf8'),
+      Buffer.from(generateImpactMarkdown(this.lastResult), 'utf8'),
     );
-  }
-
-  private toMarkdown(result: DependencyResult): string {
-    const references = result.references
-      .map((ref) => `- ${ref.source.type}: ${ref.source.apiName}`)
-      .join('\n');
-
-    return `# OrgTrace Impact Report
-
-## Target
-
-- API Name: ${result.target.apiName}
-- Type: ${result.target.type}
-
-## Risk
-
-- Level: ${result.risk.level}
-- Score: ${result.risk.score}
-
-## References
-
-${references || 'No inbound references found.'}
-`;
+    await vscode.window.showInformationMessage(`OrgTrace report exported to ${uri.fsPath}.`);
+    return uri;
   }
 }

@@ -19,8 +19,27 @@ export function App({ result }: AppProps): JSX.Element {
       </header>
       {result ? (
         <>
+          <section className="panel">
+            <h2>Risk reasons</h2>
+            <ul>
+              {result.risk.reasons.map((reason) => (
+                <li key={reason}>{reason}</li>
+              ))}
+            </ul>
+          </section>
           <DependencyList result={result} />
           <ReferenceTable references={result.references} />
+          {(result.warnings?.length || result.errors?.length) ? (
+            <section className="panel">
+              <h2>Warnings and errors</h2>
+              {result.warnings?.map((warning) => (
+                <p key={warning} className="warning">{warning}</p>
+              ))}
+              {result.errors?.map((error) => (
+                <p key={error} className="error">{error}</p>
+              ))}
+            </section>
+          ) : null}
           <ExportButton />
         </>
       ) : (
