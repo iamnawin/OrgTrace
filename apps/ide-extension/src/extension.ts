@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext): void {
       analyzeComponentCommand(service, webviewProvider),
     ),
     vscode.commands.registerCommand('orgtrace.rescan', () =>
-      rescanCommand(service),
+      rescanCommand(service, webviewProvider),
     ),
     vscode.commands.registerCommand('orgtrace.exportMarkdown', () =>
       exportReportCommand(service),
