@@ -33,7 +33,7 @@ function toPick(ref: ComponentRef): ComponentPick {
   return {
     label: `$(${display.icon}) ${display.label}: ${name}`,
     description: display.label,
-    detail: ref.filePath,
+    ...(ref.filePath ? { detail: ref.filePath } : {}),
     componentRef: ref,
   };
 }
