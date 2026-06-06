@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run OrgTrace IDE Companion",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/apps/ide-extension"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/apps/ide-extension/dist/**/*.js"
+      ],
+      "preLaunchTask": "pnpm: build"
+    }
+  ]
+}
