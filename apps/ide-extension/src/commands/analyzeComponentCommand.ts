@@ -1,41 +1,29 @@
 import * as vscode from 'vscode';
-import type { ComponentRef, MetadataType } from '@orgtrace/core';
+import type { ComponentRef } from '@orgtrace/core';
 import { discoverComponents } from '@orgtrace/scanner';
 
 import type { OrgTraceService } from '../OrgTraceService';
 import type { WebviewProvider } from '../WebviewProvider';
-
-interface TypeDisplay {
-  icon: string;
-  label: string;
-}
-
-/** Display metadata for the component types surfaced by the picker. */
-const TYPE_DISPLAY: Partial<Record<MetadataType, TypeDisplay>> = {
-  Flow: { icon: 'symbol-event', label: 'Flow' },
-  ApexClass: { icon: 'symbol-class', label: 'Apex Class' },
-  CustomField: { icon: 'symbol-field', label: 'Field' },
-  CustomObject: { icon: 'database', label: 'Object' },
-  LightningComponentBundle: { icon: 'symbol-method', label: 'LWC' },
-  PermissionSet: { icon: 'shield', label: 'Permission Set' },
-  ValidationRule: { icon: 'checklist', label: 'Validation Rule' },
-};
-
-const FALLBACK_DISPLAY: TypeDisplay = { icon: 'symbol-misc', label: 'Component' };
+import { buildComponentPicks, rawFallbackRef } from './componentPicks';
 
 interface ComponentPick extends vscode.QuickPickItem {
   componentRef: ComponentRef;
 }
 
-function toPick(ref: ComponentRef): ComponentPick {
-  const display = TYPE_DISPLAY[ref.type] ?? FALLBACK_DISPLAY;
-  const name = ref.label ?? ref.apiName;
-  return {
-    label: `$(${display.icon}) ${display.label}: ${name}`,
-    description: display.label,
-    ...(ref.filePath ? { detail: ref.filePath } : {}),
-    componentRef: ref,
-  };
+/** Maps the pure pick models onto VS Code QuickPick items with separator rows. */
+function toQuickPickItems(
+  refs: ComponentRef[],
+): (vscode.QuickPickItem | ComponentPick)[] {
+  return buildComponentPicks(refs).map((model) =>
+    model.kind === 'separator'
+      ? { label: model.label, kind: vscode.QuickPickItemKind.Separator }
+      : {
+          label: model.label,
+          description: model.description,
+          ...(model.detail ? { detail: model.detail } : {}),
+          componentRef: model.componentRef,
+        },
+  );
 }
 
 async function pickComponent(
@@ -57,17 +45,18 @@ async function pickComponent(
       'Analyze Anyway',
     );
     if (choice !== 'Analyze Anyway') return undefined;
-    return { apiName: query, type: 'Unknown' satisfies MetadataType };
+    return rawFallbackRef(query);
   }
 
-  const selected = await vscode.window.showQuickPick(matches.map(toPick), {
+  const selected = await vscode.window.showQuickPick(toQuickPickItems(matches), {
     title: 'OrgTrace: Select Component',
     placeHolder: `${matches.length} match${matches.length === 1 ? '' : 'es'} — choose the exact component`,
     matchOnDescription: true,
     matchOnDetail: true,
   });
 
-  return selected?.componentRef;
+  if (!selected || !('componentRef' in selected)) return undefined;
+  return selected.componentRef;
 }
 
 export async function analyzeComponentCommand(
