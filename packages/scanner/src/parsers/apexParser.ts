@@ -15,7 +15,7 @@ export const apexParser: FileParser = {
   },
 
   parse(ctx: ParseContext): DependencyReference[] {
-    const { filePath, content, target, projectRoot } = ctx;
+    const { filePath, content, target, projectRoot, searchTerm } = ctx;
     const refs: DependencyReference[] = [];
     const isTest = isTestFile(content);
     const sourceApiName = path.basename(filePath).replace(/\.(cls|trigger)$/, '');
@@ -28,7 +28,7 @@ export const apexParser: FileParser = {
       const line = lines[i] ?? '';
       const lineNumber = i + 1;
 
-      if (!line.includes(target.apiName)) continue;
+      if (!line.includes(searchTerm)) continue;
 
       // Skip comment-only lines
       if (/^\s*(\/\/|\/\*)/.test(line)) continue;

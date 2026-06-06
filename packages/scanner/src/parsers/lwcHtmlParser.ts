@@ -11,7 +11,7 @@ export const lwcHtmlParser: FileParser = {
   },
 
   parse(ctx: ParseContext): DependencyReference[] {
-    const { filePath, content, target, projectRoot } = ctx;
+    const { filePath, content, target, projectRoot, searchTerm } = ctx;
     const refs: DependencyReference[] = [];
     const sourceApiName = path.basename(path.dirname(filePath));
     const relativePath = path.relative(projectRoot, filePath);
@@ -19,7 +19,7 @@ export const lwcHtmlParser: FileParser = {
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i] ?? '';
-      if (!line.toLowerCase().includes(target.apiName.toLowerCase())) continue;
+      if (!line.toLowerCase().includes(searchTerm.toLowerCase())) continue;
       if (/^\s*<!--/.test(line)) continue;
 
       refs.push({

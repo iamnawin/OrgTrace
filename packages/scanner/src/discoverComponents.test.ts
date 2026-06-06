@@ -50,11 +50,11 @@ describe('discoverComponents', () => {
     expect(byKey.has('ApexClass:ContactService')).toBe(false);
   });
 
-  it('uses the bare field name as apiName and the object-qualified name as label', async () => {
+  it('qualifies the field apiName and label with the owning object', async () => {
     const results = await discoverComponents(projectPath, 'account alert');
     const field = results.find((r) => r.type === 'CustomField');
 
-    expect(field?.apiName).toBe('Account_Alert_Message__c');
+    expect(field?.apiName).toBe('Case.Account_Alert_Message__c');
     expect(field?.label).toBe('Case.Account_Alert_Message__c');
   });
 

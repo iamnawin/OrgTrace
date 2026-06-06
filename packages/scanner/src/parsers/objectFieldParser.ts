@@ -38,7 +38,7 @@ export const objectFieldParser: FileParser = {
   },
 
   parse(ctx: ParseContext): DependencyReference[] {
-    const { filePath, content, target, projectRoot } = ctx;
+    const { filePath, content, target, projectRoot, searchTerm } = ctx;
     const refs: DependencyReference[] = [];
 
     let parsed: unknown;
@@ -49,7 +49,7 @@ export const objectFieldParser: FileParser = {
     }
 
     const found: string[] = [];
-    searchNode(parsed, target.apiName, found);
+    searchNode(parsed, searchTerm, found);
     if (found.length === 0) return refs;
 
     const sourceApiName = path.basename(filePath).replace(/\.(object|field)-meta\.xml$/, '');

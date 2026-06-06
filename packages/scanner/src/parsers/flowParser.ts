@@ -29,7 +29,7 @@ export const flowParser: FileParser = {
   },
 
   parse(ctx: ParseContext): DependencyReference[] {
-    const { filePath, content, target, projectRoot } = ctx;
+    const { filePath, content, target, projectRoot, searchTerm } = ctx;
     const refs: DependencyReference[] = [];
 
     let parsed: unknown;
@@ -40,7 +40,7 @@ export const flowParser: FileParser = {
     }
 
     const found: string[] = [];
-    searchNode(parsed, target.apiName, found);
+    searchNode(parsed, searchTerm, found);
 
     if (found.length === 0) return refs;
 

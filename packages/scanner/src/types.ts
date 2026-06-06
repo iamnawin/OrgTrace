@@ -21,6 +21,8 @@ export interface ParseContext {
   content: string;
   target: ComponentRef;
   projectRoot: string;
+  /** Substring to search file content for; derived from {@link target}. */
+  searchTerm: string;
 }
 
 export interface FileParser {

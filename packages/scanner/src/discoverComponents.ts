@@ -59,11 +59,15 @@ const DISCOVERY_RULES: DiscoveryRule[] = [
     pattern: '**/*.field-meta.xml',
     build: (abs, root) => {
       const fieldName = stripSuffix(path.basename(abs), FIELD_SUFFIX);
+      // Qualify with the owning object so fields that share an API name across
+      // objects stay distinct. The scanner searches by the bare field name, so
+      // a qualified apiName still matches bare and qualified metadata refs.
+      const qualifiedName = `${owningObject(abs)}.${fieldName}`;
       return {
-        apiName: fieldName,
+        apiName: qualifiedName,
         type: 'CustomField',
         filePath: path.relative(root, abs),
-        label: `${owningObject(abs)}.${fieldName}`,
+        label: qualifiedName,
       };
     },
   },

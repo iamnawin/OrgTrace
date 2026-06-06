@@ -5,6 +5,7 @@ import type { DependencyReference } from '@orgtrace/core';
 import { DEFAULT_CONCURRENCY, DEFAULT_IGNORE, SFDX_PATTERNS } from './constants';
 import { fileParsers } from './parsers';
 import { deduplicateReferences } from './referenceKey';
+import { targetSearchTerm } from './targetMatch';
 import type { FileParser, ScanOptions, ScanResult } from './types';
 
 async function readForceignore(projectPath: string): Promise<string[]> {
@@ -38,6 +39,7 @@ async function processBatch(
   parsers: FileParser[],
   options: ScanOptions,
   projectPath: string,
+  searchTerm: string,
   result: { refs: DependencyReference[]; warnings: string[]; errors: string[] },
   progress: { scanned: number },
 ): Promise<void> {
@@ -65,6 +67,7 @@ async function processBatch(
             content: read.content,
             target: options.target,
             projectRoot: projectPath,
+            searchTerm,
           });
           result.refs.push(...found);
         } catch (err) {
@@ -119,6 +122,7 @@ export async function scan(options: ScanOptions): Promise<ScanResult> {
   }
 
   const total = files.length;
+  const searchTerm = targetSearchTerm(target);
   const result = {
     refs: [] as DependencyReference[],
     warnings: [] as string[],
@@ -131,7 +135,7 @@ export async function scan(options: ScanOptions): Promise<ScanResult> {
   // Process in batches
   for (let i = 0; i < files.length; i += maxConcurrency) {
     const batch = files.slice(i, i + maxConcurrency);
-    await processBatch(batch, fileParsers, options, projectPath, result, progress);
+    await processBatch(batch, fileParsers, options, projectPath, searchTerm, result, progress);
 
     onProgress?.({
       scanned: progress.scanned,

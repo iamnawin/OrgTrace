@@ -11,7 +11,7 @@ export const lwcJsParser: FileParser = {
   },
 
   parse(ctx: ParseContext): DependencyReference[] {
-    const { filePath, content, target, projectRoot } = ctx;
+    const { filePath, content, target, projectRoot, searchTerm } = ctx;
     const refs: DependencyReference[] = [];
     const sourceApiName = path.basename(path.dirname(filePath));
     const relativePath = path.relative(projectRoot, filePath);
@@ -19,7 +19,7 @@ export const lwcJsParser: FileParser = {
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i] ?? '';
-      if (!line.includes(target.apiName)) continue;
+      if (!line.includes(searchTerm)) continue;
 
       let relationshipType: DependencyReference['relationshipType'] = 'References';
       let confidence: DependencyReference['confidence'] = 'Medium';
