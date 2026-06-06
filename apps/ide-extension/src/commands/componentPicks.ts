@@ -22,6 +22,26 @@ function displayFor(type: MetadataType): TypeDisplay {
   return TYPE_DISPLAY[type] ?? FALLBACK_DISPLAY;
 }
 
+/**
+ * Group ordering for the picker, tuned for Salesforce impact analysis: surface
+ * automation/code first, then fields/objects, then everything else. Types absent
+ * from this list sort last (in their original relative order).
+ */
+const GROUP_ORDER: MetadataType[] = [
+  'Flow',
+  'ApexClass',
+  'CustomField',
+  'CustomObject',
+  'LightningComponentBundle',
+  'PermissionSet',
+  'ValidationRule',
+];
+
+function groupRank(type: MetadataType): number {
+  const index = GROUP_ORDER.indexOf(type);
+  return index === -1 ? GROUP_ORDER.length : index;
+}
+
 /** A type heading rendered as a non-selectable QuickPick separator row. */
 export interface ComponentSeparatorModel {
   kind: 'separator';
@@ -53,15 +73,16 @@ function toItem(ref: ComponentRef): ComponentItemModel {
 
 /**
  * Builds the QuickPick model for discovered components, inserting a separator
- * heading before each metadata type group. Expects `refs` to already be sorted
- * by type (the contract of `discoverComponents`); consecutive items of the same
- * type share one heading.
+ * heading before each metadata type group. Reorders groups into {@link GROUP_ORDER}
+ * (impact-analysis priority) while preserving each item's relative order within
+ * its group; consecutive items of the same type share one heading.
  */
 export function buildComponentPicks(refs: ComponentRef[]): ComponentPickModel[] {
+  const ordered = [...refs].sort((a, b) => groupRank(a.type) - groupRank(b.type));
   const models: ComponentPickModel[] = [];
   let currentType: MetadataType | undefined;
 
-  for (const ref of refs) {
+  for (const ref of ordered) {
     if (ref.type !== currentType) {
       currentType = ref.type;
       models.push({ kind: 'separator', label: displayFor(ref.type).label });

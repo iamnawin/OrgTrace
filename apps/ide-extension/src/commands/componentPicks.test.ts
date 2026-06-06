@@ -18,15 +18,15 @@ const refs: ComponentRef[] = [
 ];
 
 describe('buildComponentPicks', () => {
-  it('inserts a separator heading before each metadata type group', () => {
+  it('orders separator groups by impact-analysis priority, not alphabetically', () => {
     const models = buildComponentPicks(refs);
     const separators = models.filter((m) => m.kind === 'separator');
 
     expect(separators.map((s) => s.label)).toEqual([
+      'Flow',
       'Apex Class',
       'Field',
       'Object',
-      'Flow',
       'LWC',
       'Permission Set',
     ]);
