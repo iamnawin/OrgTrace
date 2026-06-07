@@ -1,6 +1,6 @@
 import type { ComponentRef, MetadataType } from '@orgtrace/core';
 
-interface TypeDisplay {
+export interface TypeDisplay {
   icon: string;
   label: string;
 }
@@ -18,7 +18,7 @@ const TYPE_DISPLAY: Partial<Record<MetadataType, TypeDisplay>> = {
 
 const FALLBACK_DISPLAY: TypeDisplay = { icon: 'symbol-misc', label: 'Component' };
 
-function displayFor(type: MetadataType): TypeDisplay {
+export function displayFor(type: MetadataType): TypeDisplay {
   return TYPE_DISPLAY[type] ?? FALLBACK_DISPLAY;
 }
 
@@ -27,7 +27,7 @@ function displayFor(type: MetadataType): TypeDisplay {
  * automation/code first, then fields/objects, then everything else. Types absent
  * from this list sort last (in their original relative order).
  */
-const GROUP_ORDER: MetadataType[] = [
+export const GROUP_ORDER: MetadataType[] = [
   'Flow',
   'ApexClass',
   'CustomField',

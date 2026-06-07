@@ -1,13 +1,37 @@
 import * as vscode from 'vscode';
-import type { ComponentRef } from '@orgtrace/core';
+import type { ComponentRef, MetadataType } from '@orgtrace/core';
 import { discoverComponents } from '@orgtrace/scanner';
 
 import type { OrgTraceService } from '../OrgTraceService';
 import type { WebviewProvider } from '../WebviewProvider';
 import { buildComponentPicks, rawFallbackRef } from './componentPicks';
+import { buildScopeOptions } from './scopePicker';
 
 interface ComponentPick extends vscode.QuickPickItem {
   componentRef: ComponentRef;
+}
+
+interface ScopePick extends vscode.QuickPickItem {
+  scopeType?: MetadataType;
+}
+
+/**
+ * Asks the user to narrow the search to a single metadata type. Returns the
+ * chosen type (or `undefined` for "All"); a cancelled pick aborts the command.
+ */
+async function pickScope(): Promise<{ cancelled: boolean; type: MetadataType | undefined }> {
+  const items: ScopePick[] = buildScopeOptions().map((option) => ({
+    label: option.icon ? `$(${option.icon}) ${option.label}` : option.label,
+    ...(option.type ? { scopeType: option.type } : {}),
+  }));
+
+  const selected = await vscode.window.showQuickPick(items, {
+    title: 'OrgTrace: Filter by Metadata Type',
+    placeHolder: 'Narrow the search by type, or choose All',
+  });
+
+  if (!selected) return { cancelled: true, type: undefined };
+  return { cancelled: false, type: selected.scopeType };
 }
 
 /** Maps the pure pick models onto VS Code QuickPick items with separator rows. */
@@ -29,13 +53,14 @@ function toQuickPickItems(
 async function pickComponent(
   projectPath: string,
   query: string,
+  typeFilter?: MetadataType,
 ): Promise<ComponentRef | undefined> {
   const matches = await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
       title: `OrgTrace: searching for "${query}"…`,
     },
-    () => discoverComponents(projectPath, query),
+    () => discoverComponents(projectPath, query, typeFilter),
   );
 
   if (matches.length === 0) {
@@ -70,6 +95,9 @@ export async function analyzeComponentCommand(
     return;
   }
 
+  const scope = await pickScope();
+  if (scope.cancelled) return;
+
   const query = await vscode.window.showInputBox({
     prompt: 'Search for a Salesforce component to analyze',
     placeHolder: 'account alert',
@@ -78,7 +106,7 @@ export async function analyzeComponentCommand(
   if (!query) return;
 
   const projectPath = workspaceFolder.uri.fsPath;
-  const target = await pickComponent(projectPath, query);
+  const target = await pickComponent(projectPath, query, scope.type);
 
   if (!target) return;
 

@@ -78,4 +78,18 @@ describe('discoverComponents', () => {
     const results = await discoverComponents(projectPath, '');
     expect(results.length).toBeGreaterThanOrEqual(8);
   });
+
+  it('restricts results to the requested metadata type when a filter is given', async () => {
+    const flows = await discoverComponents(projectPath, 'account', 'Flow');
+
+    expect(flows.length).toBeGreaterThan(0);
+    expect(flows.every((r) => r.type === 'Flow')).toBe(true);
+  });
+
+  it('ignores other types entirely under a filter, even for a broad query', async () => {
+    const fields = await discoverComponents(projectPath, '', 'CustomField');
+
+    expect(fields.every((r) => r.type === 'CustomField')).toBe(true);
+    expect(fields.some((r) => r.apiName === 'Case.Account_Alert_Message__c')).toBe(true);
+  });
 });

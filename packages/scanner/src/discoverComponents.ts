@@ -116,16 +116,21 @@ function normalize(value: string): string {
  * Finds candidate Salesforce components in a local SFDX project whose name
  * matches `query`. Filename-based and content-free — it surfaces components for
  * the user to pick from, not full dependency analysis. An empty query returns
- * every candidate.
+ * every candidate. Pass `typeFilter` to restrict discovery to a single metadata
+ * type (e.g. the picker's scope filter).
  */
 export async function discoverComponents(
   projectPath: string,
   query: string,
+  typeFilter?: MetadataType,
 ): Promise<ComponentRef[]> {
   const normalizedQuery = normalize(query);
+  const rules = typeFilter
+    ? DISCOVERY_RULES.filter((rule) => rule.type === typeFilter)
+    : DISCOVERY_RULES;
 
   const perRule = await Promise.all(
-    DISCOVERY_RULES.map(async (rule) => {
+    rules.map(async (rule) => {
       let files: string[];
       try {
         files = await fg(rule.pattern, {
