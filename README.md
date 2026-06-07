@@ -20,6 +20,14 @@ Before you change a field or refactor a class, you need to know what breaks. Sal
 
 All surfaces share one reusable TypeScript core.
 
+### IDE extension (current)
+
+Run **OrgTrace: Analyze Component** from the command palette in a Salesforce project:
+
+1. Type a partial component name to search.
+2. Pick the exact component from the type-grouped list (or analyze the raw name if there's no match).
+3. Review the dependency/risk report in the panel, then export it as Markdown.
+
 ## Architecture
 
 This is a **pnpm + Turborepo monorepo** built on a shared-core-library pattern.
@@ -51,10 +59,11 @@ apps/
 
 ## How it works
 
-1. **Scan** — `@orgtrace/scanner` walks the SFDX project, routing each file through a `FileParser` registry (regex for Apex/LWC, XML parsing for Flow/Object/Field/PermissionSet).
-2. **Normalize** — every parser emits the same `DependencyReference` contract from `@orgtrace/core`.
-3. **Score** — `RiskEngine` applies confidence-weighted, rule-based scoring (0–100) and returns transparent `reasons[]` + `recommendations[]`.
-4. **Report** — surfaces render the `DependencyResult` and can export Markdown.
+1. **Search & pick** — type a partial name; `discoverComponents` finds matching metadata (ignoring spaces, underscores, and casing) and the IDE presents a QuickPick grouped by metadata type, ordered for impact analysis (Flow → Apex Class → Field → Object → LWC → Permission Set → Validation Rule). Fields are qualified by their owning object (e.g. `Case.Account_Alert_Message__c`). No match falls back to analyzing the raw API name.
+2. **Scan** — `@orgtrace/scanner` walks the SFDX project, routing each file through a `FileParser` registry (regex for Apex/LWC, XML parsing for Flow/Object/Field/PermissionSet). Qualified field targets still match both qualified and bare references in source.
+3. **Normalize** — every parser emits the same `DependencyReference` contract from `@orgtrace/core`.
+4. **Score** — `RiskEngine` applies confidence-weighted, rule-based scoring (0–100) and returns transparent `reasons[]` + `recommendations[]`.
+5. **Report** — surfaces render the `DependencyResult` and can export Markdown.
 
 ## Develop
 

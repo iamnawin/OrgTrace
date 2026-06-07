@@ -29,3 +29,11 @@ webview/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local tooling state/config (machine-local, not shared)
+.omx/
+.claude/settings.local.json
+.claude/agents/
+.claude/settings/
+.claude/system-prompts/
+.claude/ORGTRACE_PROJECT_CONTEXT.md
