@@ -1,24 +1,33 @@
 import type { DependencyReference } from '@orgtrace/core';
 import { groupReferencesBySourceType } from './referenceGroups';
+import { postWebviewMessage } from './webviewMessaging';
 
 export interface ReferenceTableProps {
   references: DependencyReference[];
+  emptyMessage?: string;
+  sourceHeading?: string;
+  title?: string;
 }
 
-export function ReferenceTable({ references }: ReferenceTableProps): JSX.Element {
+export function ReferenceTable({
+  references,
+  emptyMessage = 'No inbound references found.',
+  sourceHeading = 'Source',
+  title = 'Inbound references',
+}: ReferenceTableProps): JSX.Element {
   const groups = groupReferencesBySourceType(references);
 
   return (
     <section className="panel">
-      <h2>References</h2>
-      {groups.length === 0 ? <p>No inbound references found.</p> : null}
+      <h2>{title}</h2>
+      {groups.length === 0 ? <p>{emptyMessage}</p> : null}
       {groups.map((group) => (
         <div key={group.sourceType}>
           <h3>{group.sourceType}</h3>
           <table>
             <thead>
               <tr>
-                <th>Source</th>
+                <th>{sourceHeading}</th>
                 <th>Relationship</th>
                 <th>Location</th>
                 <th>Confidence</th>
@@ -34,7 +43,19 @@ export function ReferenceTable({ references }: ReferenceTableProps): JSX.Element
                   <tr key={`${reference.source.type}:${reference.source.apiName}:${reference.relationshipType}:${location}`}>
                     <td>{reference.source.apiName}</td>
                     <td>{reference.relationshipType}</td>
-                    <td>{location || 'Unknown'}</td>
+                    <td>
+                      {filePath ? (
+                        <button
+                          className="link-button"
+                          type="button"
+                          onClick={() => postWebviewMessage({ type: 'openInEditor', filePath, ...(lineNumber ? { lineNumber } : {}) })}
+                        >
+                          {location}
+                        </button>
+                      ) : (
+                        'Unknown'
+                      )}
+                    </td>
                     <td>{reference.confidence}</td>
                   </tr>
                 );

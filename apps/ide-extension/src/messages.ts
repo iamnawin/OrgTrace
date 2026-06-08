@@ -8,6 +8,7 @@ import type { DependencyResult, ComponentRef } from '@orgtrace/core';
 export type WebviewToHostMessage =
   | { type: 'ready' }
   | { type: 'analyze'; target: ComponentRef }
+  | { type: 'analyzeMany'; targets: ComponentRef[] }
   | { type: 'rescan' }
   | { type: 'exportMarkdown' }
   | { type: 'openInEditor'; filePath: string; lineNumber?: number }
@@ -17,5 +18,7 @@ export type WebviewToHostMessage =
 export type HostToWebviewMessage =
   | { type: 'analyzing'; target: ComponentRef }
   | { type: 'progress'; scanned: number; total: number; currentFile?: string }
+  | { type: 'componentPicker'; components: ComponentRef[] }
   | { type: 'result'; result: DependencyResult }
+  | { type: 'results'; results: DependencyResult[] }
   | { type: 'error'; message: string };

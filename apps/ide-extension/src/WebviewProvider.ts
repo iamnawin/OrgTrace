@@ -1,21 +1,50 @@
 import * as vscode from 'vscode';
-import type { DependencyResult } from '@orgtrace/core';
+import type { ComponentRef, DependencyResult } from '@orgtrace/core';
+import type { WebviewToHostMessage } from './messages';
+
+type WebviewInitialPayload = DependencyResult | DependencyResult[];
+interface WebviewPayload {
+  result?: WebviewInitialPayload;
+  components?: ComponentRef[];
+}
 
 export class WebviewProvider {
   private panel: vscode.WebviewPanel | undefined;
   private exportHandler: (() => void | Promise<void>) | undefined;
+  private analyzeManyHandler:
+    | ((targets: ComponentRef[]) => void | Promise<void>)
+    | undefined;
 
   constructor(private readonly extensionUri: vscode.Uri) {}
 
   async showResult(result: DependencyResult): Promise<void> {
+    await this.showResults([result]);
+  }
+
+  async showResults(results: DependencyResult[]): Promise<void> {
     const panel = this.getPanel();
-    panel.webview.html = await this.getHtml(panel.webview, result);
-    void panel.webview.postMessage({ type: 'result', result });
+    panel.webview.html = await this.getHtml(panel.webview, { result: results });
+    void panel.webview.postMessage(
+      results.length === 1
+        ? { type: 'result', result: results[0]! }
+        : { type: 'results', results },
+    );
+    panel.reveal(vscode.ViewColumn.Beside);
+  }
+
+  async showComponentPicker(components: ComponentRef[]): Promise<void> {
+    const panel = this.getPanel();
+    panel.webview.html = await this.getHtml(panel.webview, { components });
+    void panel.webview.postMessage({ type: 'componentPicker', components });
     panel.reveal(vscode.ViewColumn.Beside);
   }
 
   onExport(handler: () => void | Promise<void>): void {
     this.exportHandler = handler;
+  }
+
+  onAnalyzeMany(handler: (targets: ComponentRef[]) => void | Promise<void>): void {
+    this.analyzeManyHandler = handler;
   }
 
   private getPanel(): vscode.WebviewPanel {
@@ -35,18 +64,41 @@ export class WebviewProvider {
     this.panel.onDidDispose(() => {
       this.panel = undefined;
     });
-    this.panel.webview.onDidReceiveMessage((message: { type?: string }) => {
+    this.panel.webview.onDidReceiveMessage((message: WebviewToHostMessage) => {
       if (message.type === 'exportMarkdown') {
         void this.exportHandler?.();
+        return;
+      }
+      if (message.type === 'openInEditor') {
+        void this.openInEditor(message.filePath, message.lineNumber);
+        return;
+      }
+      if (message.type === 'analyzeMany') {
+        void this.analyzeManyHandler?.(message.targets);
       }
     });
 
     return this.panel;
   }
 
+  private async openInEditor(filePath: string, lineNumber?: number): Promise<void> {
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    const uri = workspaceFolder
+      ? vscode.Uri.joinPath(workspaceFolder.uri, filePath)
+      : vscode.Uri.file(filePath);
+    const document = await vscode.workspace.openTextDocument(uri);
+    const editor = await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+
+    if (lineNumber && lineNumber > 0) {
+      const position = new vscode.Position(lineNumber - 1, 0);
+      editor.selection = new vscode.Selection(position, position);
+      editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
+    }
+  }
+
   private async getHtml(
     webview: vscode.Webview,
-    result: DependencyResult,
+    payload: WebviewPayload,
   ): Promise<string> {
     const indexUri = vscode.Uri.joinPath(
       this.extensionUri,
@@ -70,7 +122,7 @@ export class WebviewProvider {
 
       return withAssetUris.replace(
         '</head>',
-        `<script>window.__ORGTRACE_INITIAL_RESULT__=${JSON.stringify(result)};</script></head>`,
+        `<script>window.__ORGTRACE_INITIAL_RESULT__=${JSON.stringify(payload.result)};window.__ORGTRACE_INITIAL_COMPONENTS__=${JSON.stringify(payload.components ?? [])};</script></head>`,
       );
     } catch {
       return `<!doctype html>
@@ -81,7 +133,7 @@ export class WebviewProvider {
     <title>OrgTrace</title>
   </head>
   <body>
-    <pre>${JSON.stringify(result, null, 2)}</pre>
+    <pre>${JSON.stringify(payload, null, 2)}</pre>
   </body>
 </html>`;
     }

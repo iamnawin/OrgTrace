@@ -31,6 +31,14 @@ beforeAll(async () => {
     `${base}/classes/AlertService.cls`,
     'public class AlertService {\n  void run(Case c) {\n    String x = c.Account_Alert_Message__c;\n  }\n}\n',
   );
+  await writeFile(
+    `${base}/reports/Sales/Alert_Report.report-meta.xml`,
+    '<?xml version="1.0"?><Report><columns>Account_Alert_Message__c</columns></Report>',
+  );
+  await writeFile(
+    `${base}/namedCredentials/Alert_Service.namedCredential-meta.xml`,
+    '<?xml version="1.0"?><NamedCredential><customHeaders><value>Account_Alert_Message__c</value></customHeaders></NamedCredential>',
+  );
 });
 
 afterAll(async () => {
@@ -47,6 +55,18 @@ describe('scan field matching', () => {
     const sources = result.references.map((r) => r.source.apiName);
     expect(sources).toContain('Show_Alert'); // Flow, bare field node
     expect(sources).toContain('AlertService'); // Apex, bare field access
+    expect(sources).toContain('Alert_Report'); // Generic metadata XML
+    expect(sources).toContain('Alert_Service'); // Integration metadata XML
+
+    expect(result.references).toContainEqual(
+      expect.objectContaining({
+        source: expect.objectContaining({
+          apiName: 'Alert_Service',
+          type: 'NamedCredential',
+        }),
+        relationshipType: 'Configures',
+      }),
+    );
 
     // Emitted references keep the qualified target for disambiguation.
     for (const ref of result.references) {
@@ -63,5 +83,7 @@ describe('scan field matching', () => {
     const sources = result.references.map((r) => r.source.apiName);
     expect(sources).toContain('Show_Alert');
     expect(sources).toContain('AlertService');
+    expect(sources).toContain('Alert_Report');
+    expect(sources).toContain('Alert_Service');
   });
 });

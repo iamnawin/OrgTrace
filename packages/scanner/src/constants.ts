@@ -3,11 +3,7 @@ export const SFDX_PATTERNS = [
   '**/*.trigger',
   '**/*.js',
   '**/*.html',
-  '**/*.flow-meta.xml',
-  '**/*.object-meta.xml',
-  '**/*.field-meta.xml',
-  '**/*.permissionset-meta.xml',
-  '**/*.profile-meta.xml',
+  '**/*-meta.xml',
 ];
 
 export const DEFAULT_IGNORE = [

@@ -1,4 +1,4 @@
-export type MetadataType =
+export type KnownMetadataType =
   | 'ApexClass'
   | 'ApexTrigger'
   | 'Flow'
@@ -19,6 +19,8 @@ export type MetadataType =
   | 'NamedCredential'
   | 'RemoteSiteSetting'
   | 'Unknown';
+
+export type MetadataType = KnownMetadataType | (string & {});
 
 export type ConfidenceLevel = 'High' | 'Medium' | 'Low';
 

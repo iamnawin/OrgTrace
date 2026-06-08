@@ -6,20 +6,37 @@ export interface TypeDisplay {
 }
 
 /** Display metadata for the component types surfaced by the picker. */
-const TYPE_DISPLAY: Partial<Record<MetadataType, TypeDisplay>> = {
+const TYPE_DISPLAY: Partial<Record<string, TypeDisplay>> = {
   Flow: { icon: 'symbol-event', label: 'Flow' },
   ApexClass: { icon: 'symbol-class', label: 'Apex Class' },
+  ApexTrigger: { icon: 'symbol-event', label: 'Apex Trigger' },
+  AuraDefinitionBundle: { icon: 'symbol-method', label: 'Aura' },
   CustomField: { icon: 'symbol-field', label: 'Field' },
   CustomObject: { icon: 'database', label: 'Object' },
   LightningComponentBundle: { icon: 'symbol-method', label: 'LWC' },
   PermissionSet: { icon: 'shield', label: 'Permission Set' },
+  Profile: { icon: 'account', label: 'Profile' },
   ValidationRule: { icon: 'checklist', label: 'Validation Rule' },
+  WorkflowRule: { icon: 'gear', label: 'Workflow Rule' },
+  Report: { icon: 'graph', label: 'Report' },
+  Dashboard: { icon: 'dashboard', label: 'Dashboard' },
+  CustomLabel: { icon: 'tag', label: 'Custom Label' },
+  CustomMetadata: { icon: 'symbol-namespace', label: 'Custom Metadata' },
+  EmailTemplate: { icon: 'mail', label: 'Email Template' },
+  LightningPage: { icon: 'layout', label: 'Lightning Page' },
+  NamedCredential: { icon: 'key', label: 'Named Credential' },
+  RemoteSiteSetting: { icon: 'globe', label: 'Remote Site Setting' },
 };
 
 const FALLBACK_DISPLAY: TypeDisplay = { icon: 'symbol-misc', label: 'Component' };
 
+function labelFromMetadataType(type: MetadataType): string {
+  if (type === 'Unknown') return FALLBACK_DISPLAY.label;
+  return type.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+}
+
 export function displayFor(type: MetadataType): TypeDisplay {
-  return TYPE_DISPLAY[type] ?? FALLBACK_DISPLAY;
+  return TYPE_DISPLAY[type] ?? { icon: FALLBACK_DISPLAY.icon, label: labelFromMetadataType(type) };
 }
 
 /**
@@ -30,11 +47,23 @@ export function displayFor(type: MetadataType): TypeDisplay {
 export const GROUP_ORDER: MetadataType[] = [
   'Flow',
   'ApexClass',
+  'ApexTrigger',
   'CustomField',
   'CustomObject',
   'LightningComponentBundle',
+  'AuraDefinitionBundle',
   'PermissionSet',
+  'Profile',
   'ValidationRule',
+  'WorkflowRule',
+  'Report',
+  'Dashboard',
+  'CustomLabel',
+  'CustomMetadata',
+  'EmailTemplate',
+  'LightningPage',
+  'NamedCredential',
+  'RemoteSiteSetting',
 ];
 
 function groupRank(type: MetadataType): number {

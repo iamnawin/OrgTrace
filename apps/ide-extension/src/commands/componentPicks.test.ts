@@ -13,8 +13,11 @@ const refs: ComponentRef[] = [
   { apiName: 'Account', type: 'CustomObject', filePath: 'objects/Account/Account.object-meta.xml' },
   { apiName: 'Account_Alert_Message', type: 'Flow', filePath: 'flows/Account_Alert_Message.flow-meta.xml' },
   { apiName: 'Account_Record_Trigger_Before', type: 'Flow', filePath: 'flows/Account_Record_Trigger_Before.flow-meta.xml' },
+  { apiName: 'AccountTrigger', type: 'ApexTrigger', filePath: 'triggers/AccountTrigger.trigger' },
   { apiName: 'accountAlertPanel', type: 'LightningComponentBundle', filePath: 'lwc/accountAlertPanel' },
   { apiName: 'Account_Alert_Access', type: 'PermissionSet', filePath: 'permissionsets/Account_Alert_Access.permissionset-meta.xml' },
+  { apiName: 'Account_Alert_Report', type: 'Report', filePath: 'reports/Sales/Account_Alert_Report.report-meta.xml' },
+  { apiName: 'Account_Alert_Dashboard', type: 'Dashboard', filePath: 'dashboards/Sales/Account_Alert_Dashboard.dashboard-meta.xml' },
 ];
 
 describe('buildComponentPicks', () => {
@@ -25,10 +28,13 @@ describe('buildComponentPicks', () => {
     expect(separators.map((s) => s.label)).toEqual([
       'Flow',
       'Apex Class',
+      'Apex Trigger',
       'Field',
       'Object',
       'LWC',
       'Permission Set',
+      'Report',
+      'Dashboard',
     ]);
   });
 
@@ -71,6 +77,18 @@ describe('buildComponentPicks', () => {
 
   it('returns an empty model list for no matches (no separators)', () => {
     expect(buildComponentPicks([])).toEqual([]);
+  });
+
+  it('builds readable labels for metadata types discovered outside the static display map', () => {
+    const [separator, item] = buildComponentPicks([
+      { apiName: 'Account_Link', type: 'CustomPageWebLink', filePath: 'webLinks/Account_Link.webLink-meta.xml' },
+    ]);
+
+    expect(separator).toEqual({ kind: 'separator', label: 'Custom Page Web Link' });
+    expect(item).toMatchObject({
+      kind: 'item',
+      label: '$(symbol-misc) Custom Page Web Link: Account_Link',
+    });
   });
 });
 

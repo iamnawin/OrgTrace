@@ -114,6 +114,104 @@ registerMetadataType({
 });
 
 registerMetadataType({
+  type: 'ValidationRule',
+  label: 'Validation Rule',
+  supportsLocalScan: true,
+  supportsToolingApi: true,
+  supportsMetadataApi: true,
+  fileExtensions: ['.validationRule-meta.xml'],
+});
+
+registerMetadataType({
+  type: 'WorkflowRule',
+  label: 'Workflow Rule',
+  supportsLocalScan: true,
+  supportsToolingApi: true,
+  supportsMetadataApi: true,
+  fileExtensions: ['.workflow-meta.xml'],
+});
+
+registerMetadataType({
+  type: 'AuraDefinitionBundle',
+  label: 'Aura Component',
+  supportsLocalScan: true,
+  supportsToolingApi: true,
+  supportsMetadataApi: true,
+});
+
+registerMetadataType({
+  type: 'Report',
+  label: 'Report',
+  supportsLocalScan: true,
+  supportsToolingApi: true,
+  supportsMetadataApi: true,
+  fileExtensions: ['.report-meta.xml'],
+});
+
+registerMetadataType({
+  type: 'Dashboard',
+  label: 'Dashboard',
+  supportsLocalScan: true,
+  supportsToolingApi: true,
+  supportsMetadataApi: true,
+  fileExtensions: ['.dashboard-meta.xml'],
+});
+
+registerMetadataType({
+  type: 'CustomLabel',
+  label: 'Custom Label',
+  supportsLocalScan: true,
+  supportsToolingApi: false,
+  supportsMetadataApi: true,
+  fileExtensions: ['.labels-meta.xml'],
+});
+
+registerMetadataType({
+  type: 'CustomMetadata',
+  label: 'Custom Metadata',
+  supportsLocalScan: true,
+  supportsToolingApi: true,
+  supportsMetadataApi: true,
+  fileExtensions: ['.md-meta.xml'],
+});
+
+registerMetadataType({
+  type: 'EmailTemplate',
+  label: 'Email Template',
+  supportsLocalScan: true,
+  supportsToolingApi: true,
+  supportsMetadataApi: true,
+  fileExtensions: ['.email-meta.xml'],
+});
+
+registerMetadataType({
+  type: 'LightningPage',
+  label: 'Lightning Page',
+  supportsLocalScan: true,
+  supportsToolingApi: true,
+  supportsMetadataApi: true,
+  fileExtensions: ['.flexipage-meta.xml'],
+});
+
+registerMetadataType({
+  type: 'NamedCredential',
+  label: 'Named Credential',
+  supportsLocalScan: true,
+  supportsToolingApi: true,
+  supportsMetadataApi: true,
+  fileExtensions: ['.namedCredential-meta.xml'],
+});
+
+registerMetadataType({
+  type: 'RemoteSiteSetting',
+  label: 'Remote Site Setting',
+  supportsLocalScan: true,
+  supportsToolingApi: true,
+  supportsMetadataApi: true,
+  fileExtensions: ['.remoteSite-meta.xml'],
+});
+
+registerMetadataType({
   type: 'Unknown',
   label: 'Unknown',
   supportsLocalScan: false,

@@ -5,6 +5,7 @@ import { lwcJsParser } from './lwcJsParser';
 import { lwcHtmlParser } from './lwcHtmlParser';
 import { objectFieldParser } from './objectFieldParser';
 import { permissionSetParser } from './permissionSetParser';
+import { genericMetadataXmlParser } from './genericMetadataXmlParser';
 
 export const fileParsers: FileParser[] = [
   apexParser,
@@ -13,4 +14,5 @@ export const fileParsers: FileParser[] = [
   lwcHtmlParser,
   objectFieldParser,
   permissionSetParser,
+  genericMetadataXmlParser,
 ];

@@ -1,7 +1,13 @@
+import * as fs from 'fs/promises';
 import * as path from 'path';
 import fg from 'fast-glob';
 import type { ComponentRef, MetadataType } from '@orgtrace/core';
 import { DEFAULT_IGNORE } from './constants';
+import {
+  isSpecializedMetadataXml,
+  metadataNameFromFile,
+  metadataTypeFromXml,
+} from './metadataXml';
 
 /**
  * A lightweight, filename-based discovery rule. It locates candidate metadata
@@ -107,6 +113,29 @@ const DISCOVERY_RULES: DiscoveryRule[] = [
   },
 ];
 
+async function buildGenericMetadataRef(
+  absFile: string,
+  projectPath: string,
+): Promise<ComponentRef | undefined> {
+  if (isSpecializedMetadataXml(absFile)) return undefined;
+
+  let content: string;
+  try {
+    content = await fs.readFile(absFile, 'utf8');
+  } catch {
+    return undefined;
+  }
+
+  const type = metadataTypeFromXml(content);
+  if (!type) return undefined;
+
+  return {
+    apiName: metadataNameFromFile(absFile),
+    type,
+    filePath: path.relative(projectPath, absFile),
+  };
+}
+
 /** Collapse to lowercase alphanumerics so "account alert" matches "Account_Alert_Message__c". */
 function normalize(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -152,7 +181,22 @@ export async function discoverComponents(
     }),
   );
 
-  return perRule.flat().sort((a, b) => {
+  const genericFiles = await fg('**/*-meta.xml', {
+    cwd: projectPath,
+    absolute: true,
+    ignore: DEFAULT_IGNORE,
+    onlyFiles: true,
+  });
+  const genericRefs = (
+    await Promise.all(genericFiles.map((abs) => buildGenericMetadataRef(abs, projectPath)))
+  ).filter((ref): ref is ComponentRef => {
+    if (!ref) return false;
+    if (typeFilter && ref.type !== typeFilter) return false;
+    if (!normalizedQuery) return true;
+    return normalize(ref.label ?? ref.apiName).includes(normalizedQuery);
+  });
+
+  return [...perRule.flat(), ...genericRefs].sort((a, b) => {
     if (a.type !== b.type) return a.type.localeCompare(b.type);
     return (a.label ?? a.apiName).localeCompare(b.label ?? b.apiName);
   });

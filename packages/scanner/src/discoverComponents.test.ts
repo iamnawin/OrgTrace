@@ -30,6 +30,14 @@ beforeAll(async () => {
   await writeFile(
     `${base}/objects/Case/validationRules/Account_Alert_Required.validationRule-meta.xml`,
   );
+  await writeFile(
+    `${base}/reports/Sales/Account_Alert_Report.report-meta.xml`,
+    '<?xml version="1.0"?><Report><name>Account Alert Report</name></Report>',
+  );
+  await writeFile(
+    `${base}/dashboards/Sales/Account_Alert_Dashboard.dashboard-meta.xml`,
+    '<?xml version="1.0"?><Dashboard><title>Account Alert Dashboard</title></Dashboard>',
+  );
   // Noise that should never match an "account alert" query.
   await writeFile(`${base}/classes/ContactService.cls`);
 });
@@ -47,6 +55,8 @@ describe('discoverComponents', () => {
     expect(byKey.has('ApexClass:AccountAlertController')).toBe(true);
     expect(byKey.has('LightningComponentBundle:accountAlertPanel')).toBe(true);
     expect(byKey.has('PermissionSet:Account_Alert_Access')).toBe(true);
+    expect(byKey.has('Report:Account_Alert_Report')).toBe(true);
+    expect(byKey.has('Dashboard:Account_Alert_Dashboard')).toBe(true);
     expect(byKey.has('ApexClass:ContactService')).toBe(false);
   });
 
@@ -84,6 +94,17 @@ describe('discoverComponents', () => {
 
     expect(flows.length).toBeGreaterThan(0);
     expect(flows.every((r) => r.type === 'Flow')).toBe(true);
+  });
+
+  it('restricts generic metadata results to the requested metadata type', async () => {
+    const reports = await discoverComponents(projectPath, 'account alert', 'Report');
+
+    expect(reports).toEqual([
+      expect.objectContaining({
+        type: 'Report',
+        apiName: 'Account_Alert_Report',
+      }),
+    ]);
   });
 
   it('ignores other types entirely under a filter, even for a broad query', async () => {
