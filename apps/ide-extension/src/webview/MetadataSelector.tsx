@@ -91,6 +91,7 @@ export function MetadataSelector({ components }: MetadataSelectorProps): JSX.Ele
           <h1>Metadata impact selector</h1>
         </div>
         <button
+          className="primary-action"
           type="button"
           disabled={selectedComponents.length === 0}
           onClick={() => postWebviewMessage({ type: 'analyzeMany', targets: selectedComponents })}
@@ -125,7 +126,7 @@ export function MetadataSelector({ components }: MetadataSelectorProps): JSX.Ele
               return (
                 <button
                   key={group.type}
-                  className={`type-row${group.type === activeGroup?.type ? ' active' : ''}`}
+                  className={`type-row${group.type === activeGroup?.type ? ' active' : ''}${selectedCount > 0 ? ' selected' : ''}`}
                   type="button"
                   onClick={() => setActiveType(group.type)}
                 >
@@ -175,7 +176,10 @@ export function MetadataSelector({ components }: MetadataSelectorProps): JSX.Ele
           />
           <div className="selector-list">
             {filteredComponents.map((component) => (
-              <label key={keyFor(component)} className="component-row">
+              <label
+                key={keyFor(component)}
+                className={`component-row${selectedKeys.has(keyFor(component)) ? ' selected' : ''}`}
+              >
                 <input
                   type="checkbox"
                   checked={selectedKeys.has(keyFor(component))}

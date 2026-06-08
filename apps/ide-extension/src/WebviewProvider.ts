@@ -70,7 +70,9 @@ export class WebviewProvider {
         return;
       }
       if (message.type === 'openInEditor') {
-        void this.openInEditor(message.filePath, message.lineNumber);
+        void this.openInEditor(message.filePath, message.lineNumber).catch((error: unknown) => {
+          void vscode.window.showErrorMessage(`OrgTrace could not open ${message.filePath}: ${String(error)}`);
+        });
         return;
       }
       if (message.type === 'analyzeMany') {

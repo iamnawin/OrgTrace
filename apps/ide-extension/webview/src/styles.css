@@ -1,7 +1,26 @@
 :root {
-  color: var(--vscode-foreground, #1f2933);
-  background: var(--vscode-editor-background, #ffffff);
+  --ot-bg: var(--vscode-editor-background, #101218);
+  --ot-panel: color-mix(in srgb, var(--vscode-sideBar-background, #1d2028) 88%, #111827);
+  --ot-panel-strong: color-mix(in srgb, var(--vscode-sideBar-background, #1d2028) 72%, #2563eb);
+  --ot-border: var(--vscode-panel-border, #323846);
+  --ot-text: var(--vscode-foreground, #e5e7eb);
+  --ot-muted: var(--vscode-descriptionForeground, #9aa4b2);
+  --ot-input: var(--vscode-input-background, #252a34);
+  --ot-link: var(--vscode-textLink-foreground, #4da3ff);
+  --ot-blue: #3b82f6;
+  --ot-cyan: #06b6d4;
+  --ot-green: #22c55e;
+  --ot-amber: #f59e0b;
+  --ot-red: #ef4444;
+  --ot-pink: #ec4899;
+  --ot-purple: #8b5cf6;
+  color: var(--ot-text);
+  background: var(--ot-bg);
   font-family: var(--vscode-font-family, Arial, sans-serif);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
@@ -10,21 +29,40 @@ body {
 
 .shell {
   display: grid;
-  gap: 16px;
-  padding: 20px;
+  gap: 18px;
+  min-height: 100vh;
+  padding: 18px;
+}
+
+.shell > header,
+.selector-toolbar,
+.result-panel > header {
+  background:
+    linear-gradient(135deg, rgba(59, 130, 246, 0.28), rgba(236, 72, 153, 0.12)),
+    var(--ot-panel);
+  border: 1px solid color-mix(in srgb, var(--ot-border) 65%, var(--ot-blue));
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  padding: 14px 16px;
 }
 
 .eyebrow {
-  color: var(--vscode-descriptionForeground, #5f6b7a);
+  color: color-mix(in srgb, var(--ot-cyan) 72%, var(--ot-text));
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   margin: 0 0 4px;
   text-transform: uppercase;
 }
 
+h1,
+h2,
+h3 {
+  letter-spacing: 0;
+}
+
 h1 {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 800;
   margin: 0;
 }
 
@@ -34,17 +72,27 @@ h2 {
 }
 
 h3 {
-  margin: 0 0 8px;
+  color: var(--ot-muted);
+  font-size: 13px;
+  margin: 12px 0 8px;
 }
 
 button {
-  background: var(--vscode-button-background, #0e639c);
-  border: 1px solid var(--vscode-button-border, transparent);
-  border-radius: 3px;
+  background: linear-gradient(135deg, var(--ot-blue), var(--ot-purple));
+  border: 1px solid color-mix(in srgb, var(--ot-blue) 45%, var(--ot-border));
+  border-radius: 5px;
   color: var(--vscode-button-foreground, #ffffff);
   cursor: pointer;
   font: inherit;
-  padding: 6px 10px;
+  font-weight: 700;
+  padding: 7px 12px;
+}
+
+button:hover:not(:disabled),
+button:focus-visible:not(:disabled) {
+  filter: brightness(1.08);
+  outline: 1px solid var(--vscode-focusBorder, var(--ot-cyan));
+  outline-offset: 2px;
 }
 
 button:disabled {
@@ -53,8 +101,9 @@ button:disabled {
 }
 
 .panel {
-  border: 1px solid var(--vscode-panel-border, #d6dae0);
-  border-radius: 6px;
+  background: var(--ot-panel);
+  border: 1px solid var(--ot-border);
+  border-radius: 8px;
   padding: 14px;
 }
 
@@ -63,46 +112,137 @@ button:disabled {
   margin: 0;
 }
 
+.result-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.result-panel > header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.risk-badge {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 800;
+  margin-top: 8px;
+  padding: 5px 10px;
+  text-transform: uppercase;
+}
+
+.risk-badge[data-level='Low'] {
+  background: color-mix(in srgb, var(--ot-green) 20%, transparent);
+  color: color-mix(in srgb, var(--ot-green) 82%, var(--ot-text));
+}
+
+.risk-badge[data-level='Medium'] {
+  background: color-mix(in srgb, var(--ot-amber) 22%, transparent);
+  color: color-mix(in srgb, var(--ot-amber) 82%, var(--ot-text));
+}
+
+.risk-badge[data-level='High'],
+.risk-badge[data-level='Critical'] {
+  background: color-mix(in srgb, var(--ot-red) 20%, transparent);
+  color: color-mix(in srgb, var(--ot-red) 82%, var(--ot-text));
+}
+
+.stat-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 10px;
+}
+
+.stat-card {
+  border-radius: 7px;
+  display: grid;
+  gap: 2px;
+  padding: 12px;
+}
+
+.stat-card strong {
+  font-size: 24px;
+}
+
+.stat-card span {
+  color: var(--ot-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.stat-card.inbound {
+  background: color-mix(in srgb, var(--ot-cyan) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ot-cyan) 32%, var(--ot-border));
+}
+
+.stat-card.outbound {
+  background: color-mix(in srgb, var(--ot-purple) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ot-purple) 32%, var(--ot-border));
+}
+
 table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin: 8px 0 16px;
+  overflow: hidden;
   width: 100%;
+}
+
+thead th {
+  background: color-mix(in srgb, var(--ot-blue) 12%, var(--ot-panel));
+  color: var(--ot-muted);
+  font-size: 12px;
+  text-transform: uppercase;
 }
 
 td,
 th {
-  border-bottom: 1px solid var(--vscode-panel-border, #d6dae0);
-  padding: 6px;
+  border-bottom: 1px solid var(--ot-border);
+  padding: 8px;
   text-align: left;
+  vertical-align: top;
+}
+
+tbody tr:hover {
+  background: color-mix(in srgb, var(--ot-blue) 9%, transparent);
 }
 
 .link-button {
   appearance: none;
-  background: none;
-  border: 0;
-  color: var(--vscode-textLink-foreground, #0969da);
+  background: color-mix(in srgb, var(--ot-link) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ot-link) 28%, transparent);
+  border-radius: 999px;
+  color: var(--ot-link);
   cursor: pointer;
   font: inherit;
-  padding: 0;
+  max-width: min(520px, 44vw);
+  overflow: hidden;
+  padding: 4px 9px;
   text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link-button::before {
+  content: 'Open ';
+  font-weight: 800;
 }
 
 .link-button:hover,
 .link-button:focus {
+  background: color-mix(in srgb, var(--ot-link) 20%, transparent);
   text-decoration: underline;
 }
 
-.risk-badge {
-  display: inline-block;
-  margin-top: 8px;
-}
-
 .warning {
-  color: var(--vscode-editorWarning-foreground, #9a6700);
+  color: color-mix(in srgb, var(--ot-amber) 82%, var(--ot-text));
 }
 
 .error {
-  color: var(--vscode-editorError-foreground, #c42b1c);
+  color: color-mix(in srgb, var(--ot-red) 82%, var(--ot-text));
 }
 
 .metadata-selector {
@@ -112,29 +252,39 @@ th {
 
 .selector-toolbar {
   align-items: center;
-  background: var(--vscode-sideBar-background, #252526);
-  border: 1px solid var(--vscode-panel-border, #3c3c3c);
-  border-radius: 6px;
   display: flex;
+  gap: 12px;
   justify-content: space-between;
-  padding: 12px 14px;
+}
+
+.primary-action {
+  min-width: 132px;
 }
 
 .selector-grid {
   display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(260px, 0.9fr) minmax(320px, 1.1fr);
-  min-height: 560px;
+  gap: 12px;
+  grid-template-columns: minmax(280px, 0.86fr) minmax(360px, 1.14fr);
+  min-height: min(680px, calc(100vh - 126px));
 }
 
 .selector-pane {
-  background: var(--vscode-sideBar-background, #252526);
-  border: 1px solid var(--vscode-panel-border, #3c3c3c);
-  border-radius: 6px;
+  background: var(--ot-panel);
+  border: 1px solid var(--ot-border);
+  border-radius: 8px;
   display: grid;
   grid-template-rows: auto auto 1fr;
   min-width: 0;
+  overflow: hidden;
   padding: 14px;
+}
+
+.selector-pane:first-child {
+  border-top-color: color-mix(in srgb, var(--ot-pink) 50%, var(--ot-border));
+}
+
+.selector-pane:last-child {
+  border-top-color: color-mix(in srgb, var(--ot-cyan) 50%, var(--ot-border));
 }
 
 .pane-header {
@@ -147,64 +297,73 @@ th {
 
 .pane-actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
 }
 
 .pane-actions button {
   background: transparent;
   border: 0;
-  color: var(--vscode-textLink-foreground, #3794ff);
+  color: var(--ot-link);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   padding: 2px;
   text-transform: uppercase;
 }
 
 .selector-search {
-  background: var(--vscode-input-background, #3c3c3c);
-  border: 1px solid var(--vscode-input-border, #5f5f5f);
-  border-radius: 3px;
-  color: var(--vscode-input-foreground, #cccccc);
+  background: var(--ot-input);
+  border: 1px solid var(--vscode-input-border, var(--ot-border));
+  border-radius: 6px;
+  color: var(--vscode-input-foreground, var(--ot-text));
   font: inherit;
   margin-bottom: 10px;
-  padding: 8px 10px;
+  padding: 9px 10px;
   width: 100%;
 }
 
 .selector-search:focus {
-  border-color: var(--vscode-focusBorder, #007fd4);
+  border-color: var(--vscode-focusBorder, var(--ot-cyan));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ot-cyan) 18%, transparent);
   outline: none;
 }
 
 .selector-list {
   min-height: 0;
   overflow: auto;
+  padding-right: 4px;
 }
 
 .type-row,
 .component-row {
   align-items: center;
   background: transparent;
-  border: 0;
-  border-radius: 3px;
-  color: var(--vscode-foreground, #cccccc);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--ot-text);
   display: grid;
   gap: 10px;
   grid-template-columns: auto 1fr auto;
-  min-height: 34px;
-  padding: 6px 8px;
+  min-height: 36px;
+  padding: 7px 9px;
   text-align: left;
   width: 100%;
 }
 
 .type-row:hover,
-.component-row:hover,
-.type-row.active {
-  background: var(--vscode-list-hoverBackground, #2a2d2e);
+.component-row:hover {
+  background: color-mix(in srgb, var(--ot-blue) 10%, transparent);
 }
 
 .type-row.active {
-  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  background: color-mix(in srgb, var(--ot-blue) 16%, transparent);
+  border-color: color-mix(in srgb, var(--ot-blue) 42%, var(--ot-border));
+}
+
+.type-row.selected,
+.component-row.selected {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--ot-green) 18%, transparent), transparent 88%),
+    color-mix(in srgb, var(--ot-panel-strong) 45%, var(--ot-panel));
 }
 
 .component-row {
@@ -214,7 +373,7 @@ th {
 
 .component-row span {
   display: grid;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
 }
 
@@ -227,18 +386,47 @@ th {
 
 .component-row small,
 .row-count {
-  color: var(--vscode-descriptionForeground, #8b949e);
+  color: var(--ot-muted);
   font-size: 12px;
 }
 
+.row-count {
+  background: color-mix(in srgb, var(--ot-cyan) 14%, transparent);
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+
 input[type='checkbox'] {
-  accent-color: var(--vscode-checkbox-selectBackground, #007acc);
+  accent-color: var(--ot-pink);
   height: 16px;
   width: 16px;
 }
 
-@media (max-width: 760px) {
+.export-button {
+  justify-self: start;
+}
+
+@media (max-width: 860px) {
   .selector-grid {
     grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .selector-pane {
+    min-height: 320px;
+  }
+
+  .selector-toolbar,
+  .result-panel > header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .link-button {
+    max-width: 72vw;
   }
 }
