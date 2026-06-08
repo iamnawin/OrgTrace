@@ -81,13 +81,13 @@ describe('buildComponentPicks', () => {
 
   it('builds readable labels for metadata types discovered outside the static display map', () => {
     const [separator, item] = buildComponentPicks([
-      { apiName: 'Account_Link', type: 'CustomPageWebLink', filePath: 'webLinks/Account_Link.webLink-meta.xml' },
+      { apiName: 'Account_Policy', type: 'DataObjectSearchIndexConfig', filePath: 'dataObjectSearchIndexConfigs/Account_Policy.dataObjectSearchIndexConfig-meta.xml' },
     ]);
 
-    expect(separator).toEqual({ kind: 'separator', label: 'Custom Page Web Link' });
+    expect(separator).toEqual({ kind: 'separator', label: 'Data Object Search Index Config' });
     expect(item).toMatchObject({
       kind: 'item',
-      label: '$(symbol-misc) Custom Page Web Link: Account_Link',
+      label: '$(symbol-misc) Data Object Search Index Config: Account_Policy',
     });
   });
 });
