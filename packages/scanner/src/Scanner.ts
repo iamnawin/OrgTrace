@@ -19,9 +19,29 @@ async function populateTargetDetails(
     ? target.filePath
     : path.join(projectPath, target.filePath);
 
-  // Try to find a -meta.xml if it's not already one
   let metaPath = fullPath;
-  if (!fullPath.endsWith('-meta.xml')) {
+  
+  // Handle directories (LWC, Aura bundles)
+  const stats = await fs.stat(fullPath).catch(() => null);
+  if (stats?.isDirectory()) {
+    const bundleName = path.basename(fullPath);
+    // Check for LWC meta file
+    const lwcMeta = path.join(fullPath, `${bundleName}.js-meta.xml`);
+    // Check for Aura meta file
+    const auraMeta = path.join(fullPath, `${bundleName}.cmp-meta.xml`);
+    
+    try {
+      await fs.access(lwcMeta);
+      metaPath = lwcMeta;
+    } catch {
+      try {
+        await fs.access(auraMeta);
+        metaPath = auraMeta;
+      } catch {
+        // No obvious meta file in directory
+      }
+    }
+  } else if (!fullPath.endsWith('-meta.xml')) {
     // Check if .cls-meta.xml, .trigger-meta.xml etc exists
     const possibleMeta = `${fullPath}-meta.xml`;
     try {
@@ -33,7 +53,7 @@ async function populateTargetDetails(
   }
 
   try {
-    const [content, stats] = await Promise.all([
+    const [content, fileStats] = await Promise.all([
       fs.readFile(metaPath, 'utf8'),
       fs.stat(fullPath),
     ]);
@@ -42,8 +62,8 @@ async function populateTargetDetails(
     if (details.label) target.label = details.label;
     if (details.description) target.description = details.description;
     if (details.status) target.status = details.status;
-    target.lastModifiedDate = stats.mtime.toISOString();
-    target.createdDate = stats.birthtime.toISOString();
+    target.lastModifiedDate = fileStats.mtime.toISOString();
+    target.createdDate = fileStats.birthtime.toISOString();
   } catch {
     // If reading fails, just leave it as is
   }

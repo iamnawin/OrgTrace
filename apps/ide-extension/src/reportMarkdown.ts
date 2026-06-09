@@ -43,6 +43,21 @@ export function generateImpactMarkdown(result: DependencyResult): string {
   });
   mermaid += '```';
 
+  // Plain-text fallback diagram
+  let textDiagram = '```text\n';
+  if (result.references.length > 0) {
+    result.references.slice(0, 3).forEach((ref) => {
+      textDiagram += `[${ref.source.type}: ${ref.source.apiName}]\n    | (Used By)\n    v\n`;
+    });
+  }
+  textDiagram += `(TARGET) [${result.target.type}: ${result.target.apiName}]`;
+  if (result.dependencies.length > 0) {
+    result.dependencies.slice(0, 3).forEach((dep) => {
+      textDiagram += `\n    | (Uses)\n    v\n[${dep.target.type}: ${dep.target.apiName}]`;
+    });
+  }
+  textDiagram += '\n```';
+
   return `# OrgTrace Impact Report: ${result.target.apiName}
 
 ## Selected Component Details
@@ -62,7 +77,11 @@ export function generateImpactMarkdown(result: DependencyResult): string {
 
 ## Relationship Diagram
 
+### Visual (Mermaid)
 ${mermaid}
+
+### Text Summary
+${textDiagram}
 
 ## Risk Summary
 
