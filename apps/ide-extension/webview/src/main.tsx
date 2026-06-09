@@ -21,19 +21,32 @@ const root = document.getElementById('root');
 
 if (root) {
   const reactRoot = createRoot(root);
+  let currentState: WebviewState = {
+    results: Array.isArray(initialResult) ? initialResult : initialResult ? [initialResult] : [],
+    components: window.__ORGTRACE_INITIAL_COMPONENTS__ ?? [],
+  };
+
   const render = (state: WebviewState): void => {
+    currentState = state;
     reactRoot.render(<App results={state.results} components={state.components} />);
   };
 
-  const initialResult = window.__ORGTRACE_INITIAL_RESULT__;
-  render({
-    results: Array.isArray(initialResult) ? initialResult : initialResult ? [initialResult] : [],
-    components: window.__ORGTRACE_INITIAL_COMPONENTS__ ?? [],
-  });
+  render(currentState);
 
   window.addEventListener('message', (event: MessageEvent) => {
     if (event.data?.type === 'result') {
-      render({ results: [event.data.result as DependencyResult], components: [] });
+      const enriched = event.data.result as DependencyResult;
+      const index = currentState.results.findIndex(
+        (r) => r.target.apiName === enriched.target.apiName && r.target.type === enriched.target.type
+      );
+
+      if (index !== -1) {
+        const nextResults = [...currentState.results];
+        nextResults[index] = enriched;
+        render({ ...currentState, results: nextResults });
+      } else {
+        render({ results: [enriched], components: [] });
+      }
     }
     if (event.data?.type === 'results') {
       render({ results: event.data.results as DependencyResult[], components: [] });

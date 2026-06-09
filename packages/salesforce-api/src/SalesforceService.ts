@@ -99,12 +99,24 @@ export class SalesforceService {
   }
 
   private stripNamespace(apiName: string): string {
-    // Basic namespace stripping if needed, though Tooling API usually wants DeveloperName
     const parts = apiName.split('__');
-    if (parts.length > 2) {
+    
+    if (parts.length === 3) {
+      // Managed Object/Field: ns__name__c
       return parts[1] || apiName;
     }
-    return apiName;
+    
+    if (parts.length === 2) {
+      if (apiName.endsWith('__c')) {
+        // Custom Object/Field: name__c
+        return parts[0] || apiName;
+      } else {
+        // Managed Class/Page/etc: ns__name
+        return parts[1] || apiName;
+      }
+    }
+    
+    return apiName.replace('__c', '');
   }
 
   private getToolingTable(type: string): string | null {
