@@ -1,4 +1,4 @@
-import type { DependencyReference, DependencyResult } from '@orgtrace/core';
+import type { DependencyReference, DependencyResult } from './types';
 
 function formatLocation(reference: DependencyReference): string {
   const filePath = reference.location?.filePath ?? reference.source.filePath;

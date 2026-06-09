@@ -1,11 +1,10 @@
 import * as vscode from 'vscode';
 import type { ComponentRef, DependencyResult } from '@orgtrace/core';
-import { calculateRisk, mergeComponentEnrichment } from '@orgtrace/core';
+import { calculateRisk, mergeComponentEnrichment, generateImpactMarkdown } from '@orgtrace/core';
 import { scan } from '@orgtrace/scanner';
 import { SalesforceService } from '@orgtrace/salesforce-api';
 
 import type { CacheStore } from './cache/CacheStore';
-import { generateImpactMarkdown } from './reportMarkdown';
 
 export interface AnalyzeComponentInput {
   projectPath: string;

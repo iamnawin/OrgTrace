@@ -15,7 +15,10 @@
   },
   "dependencies": {
     "@orgtrace/core": "workspace:*",
-    "@orgtrace/scanner": "workspace:*"
+    "@orgtrace/salesforce-api": "workspace:^",
+    "@orgtrace/scanner": "workspace:*",
+    "chalk": "4.1.2",
+    "commander": "^15.0.0"
   },
   "devDependencies": {
     "rimraf": "^5.0.10",
