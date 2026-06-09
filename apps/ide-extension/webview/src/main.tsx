@@ -22,7 +22,11 @@ const root = document.getElementById('root');
 if (root) {
   const reactRoot = createRoot(root);
   let currentState: WebviewState = {
-    results: Array.isArray(initialResult) ? initialResult : initialResult ? [initialResult] : [],
+    results: Array.isArray(window.__ORGTRACE_INITIAL_RESULT__)
+      ? window.__ORGTRACE_INITIAL_RESULT__
+      : window.__ORGTRACE_INITIAL_RESULT__
+        ? [window.__ORGTRACE_INITIAL_RESULT__]
+        : [],
     components: window.__ORGTRACE_INITIAL_COMPONENTS__ ?? [],
   };
 

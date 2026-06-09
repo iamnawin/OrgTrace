@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { DependencyResult } from '@orgtrace/core';
-
-import { generateImpactMarkdown } from './reportMarkdown';
+import { generateImpactMarkdown } from '@orgtrace/core';
 
 const result: DependencyResult = {
   target: {

@@ -212,11 +212,12 @@ export async function scan(options: ScanOptions): Promise<ScanResult> {
   const deduplicated = deduplicateReferences(result.refs);
 
   // Split into inbound references vs outbound dependencies
+  // Exclude self-references (source === target) to keep reports focused
   const references = deduplicated.filter(
-    (r) => r.target.apiName === target.apiName,
+    (r) => r.target.apiName === target.apiName && r.source.apiName !== target.apiName,
   );
   const dependencies = deduplicated.filter(
-    (r) => r.source.apiName === target.apiName,
+    (r) => r.source.apiName === target.apiName && r.target.apiName !== target.apiName,
   );
 
   onProgress?.({ scanned: total, total, phase: 'completed' });
