@@ -14,28 +14,60 @@ function listItems(items: string[], fallback: string): string {
 }
 
 export function generateImpactMarkdown(result: DependencyResult): string {
-  const references = result.references.map(
+  const usedBy = result.references.map(
     (ref) =>
       `${ref.source.type}: ${ref.source.apiName} (${ref.relationshipType}, ${ref.confidence}) at ${formatLocation(ref)}`,
   );
 
-  const dependencies = result.dependencies.map(
+  const uses = result.dependencies.map(
     (dep) =>
       `${dep.target.type}: ${dep.target.apiName} (${dep.relationshipType}, ${dep.confidence}) at ${formatLocation(dep)}`,
   );
 
-  return `# OrgTrace Impact Report
+  // Simple Mermaid Diagram
+  let mermaid = '```mermaid\ngraph TD\n';
+  const targetLabel = `${result.target.type}: ${result.target.apiName}`;
+  
+  // Unique nodes to avoid duplicates in Mermaid
+  const nodes = new Set<string>();
+  nodes.add(`T["${targetLabel}"]`);
 
-## Target
+  result.references.slice(0, 10).forEach((ref, i) => {
+    const nodeName = `R${i}`;
+    mermaid += `  ${nodeName}["${ref.source.type}: ${ref.source.apiName}"] --> T\n`;
+  });
 
-- API Name: ${result.target.apiName}
-- Type: ${result.target.type}
-- Scanned At: ${result.scannedAt}
+  result.dependencies.slice(0, 10).forEach((dep, i) => {
+    const nodeName = `D${i}`;
+    mermaid += `  T --> ${nodeName}["${dep.target.type}: ${dep.target.apiName}"]\n`;
+  });
+  mermaid += '```';
 
-## Risk
+  return `# OrgTrace Impact Report: ${result.target.apiName}
 
-- Level: ${result.risk.level}
-- Score: ${result.risk.score}
+## Selected Component Details
+
+- **API Name:** ${result.target.apiName}
+- **Metadata Type:** ${result.target.type}
+- **Label:** ${result.target.label ?? 'N/A'}
+- **Description:** ${result.target.description ?? 'N/A'}
+- **File Path:** ${result.target.filePath ?? 'N/A'}
+- **Status:** ${result.target.status ?? 'N/A'}
+- **Namespace:** ${result.target.namespace ?? 'N/A'}
+- **Last Modified By:** ${result.target.lastModifiedBy ?? 'Available after org connection'}
+- **Last Modified Date:** ${result.target.lastModifiedDate ?? 'N/A'}
+- **Created By:** ${result.target.createdBy ?? 'Available after org connection'}
+- **Created Date:** ${result.target.createdDate ?? 'N/A'}
+- **Source:** Local Scan
+
+## Relationship Diagram
+
+${mermaid}
+
+## Risk Summary
+
+- **Level:** ${result.risk.level}
+- **Score:** ${result.risk.score}
 
 ### Reasons
 
@@ -45,20 +77,21 @@ ${listItems(result.risk.reasons, 'No risk reasons reported.')}
 
 ${listItems(result.risk.recommendations ?? [], 'No recommendations reported.')}
 
-## References
+## Used By (Inbound)
 
-${listItems(references, 'No inbound references found.')}
+${listItems(usedBy, 'No components found that use this component.')}
 
-## Dependencies
+## Uses (Outbound)
 
-${listItems(dependencies, 'No outbound dependencies found.')}
+${listItems(uses, 'No components found that this component uses.')}
 
-## Warnings
+## Scan Info
 
-${listItems(result.warnings ?? [], 'No warnings.')}
+- **Scanned At:** ${result.scannedAt}
+- **Warnings:** ${result.warnings?.length ?? 0}
+- **Errors:** ${result.errors?.length ?? 0}
 
-## Errors
-
-${listItems(result.errors ?? [], 'No errors.')}
+${result.warnings?.length ? '\n### Warnings\n' + listItems(result.warnings, '') : ''}
+${result.errors?.length ? '\n### Errors\n' + listItems(result.errors, '') : ''}
 `;
 }

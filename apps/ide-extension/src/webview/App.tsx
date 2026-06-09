@@ -5,6 +5,8 @@ import { ExportButton } from './ExportButton';
 import { MetadataSelector } from './MetadataSelector';
 import { ReferenceTable } from './ReferenceTable';
 import { RiskBadge } from './RiskBadge';
+import { ComponentDetails } from './ComponentDetails';
+import { RelationshipDiagram } from './RelationshipDiagram';
 
 export interface AppProps {
   result?: DependencyResult;
@@ -20,22 +22,35 @@ function ResultPanel({ result }: { result: DependencyResult }): JSX.Element {
         <h2>{result.target.apiName}</h2>
         <RiskBadge risk={result.risk} />
       </header>
+      
+      <ComponentDetails target={result.target} />
+      
       <section className="panel">
-        <h3>Risk reasons</h3>
+        <h3>Risk summary</h3>
         <ul>
           {result.risk.reasons.map((reason) => (
             <li key={reason}>{reason}</li>
           ))}
         </ul>
       </section>
+
+      <RelationshipDiagram result={result} />
+
       <DependencyList result={result} />
-      <ReferenceTable references={result.references} />
+      
+      <ReferenceTable 
+        references={result.references} 
+        title="Used By (Inbound)"
+        emptyMessage="No components found that use this component."
+      />
+      
       <ReferenceTable
         references={result.dependencies}
-        emptyMessage="No outbound dependencies found."
-        sourceHeading="Dependency"
-        title="Outbound dependencies"
+        emptyMessage="No components found that this component uses."
+        sourceHeading="Component"
+        title="Uses (Outbound)"
       />
+      
       {(result.warnings?.length || result.errors?.length) ? (
         <section className="panel">
           <h3>Warnings and errors</h3>

@@ -1,12 +1,53 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import fg from 'fast-glob';
-import type { DependencyReference } from '@orgtrace/core';
+import type { DependencyReference, ComponentRef } from '@orgtrace/core';
 import { DEFAULT_CONCURRENCY, DEFAULT_IGNORE, SFDX_PATTERNS } from './constants';
 import { fileParsers } from './parsers';
 import { deduplicateReferences } from './referenceKey';
 import { targetSearchTerm } from './targetMatch';
+import { extractMetadataDetails } from './metadataXml';
 import type { FileParser, ScanOptions, ScanResult } from './types';
+
+async function populateTargetDetails(
+  target: ComponentRef,
+  projectPath: string,
+): Promise<void> {
+  if (!target.filePath) return;
+
+  const fullPath = path.isAbsolute(target.filePath)
+    ? target.filePath
+    : path.join(projectPath, target.filePath);
+
+  // Try to find a -meta.xml if it's not already one
+  let metaPath = fullPath;
+  if (!fullPath.endsWith('-meta.xml')) {
+    // Check if .cls-meta.xml, .trigger-meta.xml etc exists
+    const possibleMeta = `${fullPath}-meta.xml`;
+    try {
+      await fs.access(possibleMeta);
+      metaPath = possibleMeta;
+    } catch {
+      // no-op
+    }
+  }
+
+  try {
+    const [content, stats] = await Promise.all([
+      fs.readFile(metaPath, 'utf8'),
+      fs.stat(fullPath),
+    ]);
+
+    const details = extractMetadataDetails(content);
+    if (details.label) target.label = details.label;
+    if (details.description) target.description = details.description;
+    if (details.status) target.status = details.status;
+    target.lastModifiedDate = stats.mtime.toISOString();
+    target.createdDate = stats.birthtime.toISOString();
+  } catch {
+    // If reading fails, just leave it as is
+  }
+}
 
 async function readForceignore(projectPath: string): Promise<string[]> {
   try {
@@ -131,6 +172,8 @@ export async function scan(options: ScanOptions): Promise<ScanResult> {
   const progress = { scanned: 0 };
 
   onProgress?.({ scanned: 0, total, phase: 'scanning' });
+
+  await populateTargetDetails(target, projectPath);
 
   // Process in batches
   for (let i = 0; i < files.length; i += maxConcurrency) {

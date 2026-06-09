@@ -9,6 +9,8 @@ export const SPECIALIZED_META_XML_SUFFIXES = [
   '.permissionset-meta.xml',
   '.profile-meta.xml',
   '.js-meta.xml',
+  '.cls-meta.xml',
+  '.trigger-meta.xml',
   '.validationRule-meta.xml',
 ] as const;
 
@@ -34,4 +36,16 @@ export function metadataNameFromFile(filePath: string): string {
   return typeSeparatorIndex === -1
     ? metadataName
     : metadataName.slice(0, typeSeparatorIndex);
+}
+
+export function extractMetadataDetails(content: string): {
+  label?: string;
+  description?: string;
+  status?: string;
+} {
+  const label = content.match(/<label>(.*?)<\/label>/)?.[1];
+  const description = content.match(/<description>(.*?)<\/description>/)?.[1];
+  const status = content.match(/<status>(.*?)<\/status>/)?.[1];
+
+  return { label, description, status };
 }

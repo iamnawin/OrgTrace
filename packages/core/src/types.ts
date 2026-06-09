@@ -61,6 +61,12 @@ export interface ComponentRef {
   durableId?: string;
   namespace?: string;
   label?: string;
+  description?: string;
+  status?: string;
+  lastModifiedBy?: string;
+  lastModifiedDate?: string;
+  createdBy?: string;
+  createdDate?: string;
 }
 
 export interface SourceLocation {

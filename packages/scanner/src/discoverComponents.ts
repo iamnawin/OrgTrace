@@ -44,7 +44,7 @@ const DISCOVERY_RULES: DiscoveryRule[] = [
   },
   {
     type: 'ApexClass',
-    pattern: '**/*.cls',
+    pattern: '**/classes/*.cls',
     build: (abs, root) => ({
       apiName: stripSuffix(path.basename(abs), '.cls'),
       type: 'ApexClass',
@@ -52,8 +52,17 @@ const DISCOVERY_RULES: DiscoveryRule[] = [
     }),
   },
   {
+    type: 'ApexTrigger',
+    pattern: '**/triggers/*.trigger',
+    build: (abs, root) => ({
+      apiName: stripSuffix(path.basename(abs), '.trigger'),
+      type: 'ApexTrigger',
+      filePath: path.relative(root, abs),
+    }),
+  },
+  {
     type: 'CustomObject',
-    pattern: '**/*.object-meta.xml',
+    pattern: '**/objects/*/*.object-meta.xml',
     build: (abs, root) => ({
       apiName: stripSuffix(path.basename(abs), '.object-meta.xml'),
       type: 'CustomObject',
@@ -62,12 +71,9 @@ const DISCOVERY_RULES: DiscoveryRule[] = [
   },
   {
     type: 'CustomField',
-    pattern: '**/*.field-meta.xml',
+    pattern: '**/fields/*.field-meta.xml',
     build: (abs, root) => {
       const fieldName = stripSuffix(path.basename(abs), FIELD_SUFFIX);
-      // Qualify with the owning object so fields that share an API name across
-      // objects stay distinct. The scanner searches by the bare field name, so
-      // a qualified apiName still matches bare and qualified metadata refs.
       const qualifiedName = `${owningObject(abs)}.${fieldName}`;
       return {
         apiName: qualifiedName,
