@@ -73,7 +73,7 @@ export function generateImpactMarkdown(result: DependencyResult): string {
 - **Last Modified Date:** ${result.target.lastModifiedDate ?? 'N/A'}
 - **Created By:** ${result.target.createdBy ?? 'Available after org connection'}
 - **Created Date:** ${result.target.createdDate ?? 'N/A'}
-- **Source:** Local Scan
+- **Data Sources:** ${result.sources.join(', ')}
 
 ## Relationship Diagram
 

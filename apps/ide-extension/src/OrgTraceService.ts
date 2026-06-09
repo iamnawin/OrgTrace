@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import type { ComponentRef, DependencyResult } from '@orgtrace/core';
-import { calculateRisk } from '@orgtrace/core';
+import { calculateRisk, mergeComponentEnrichment } from '@orgtrace/core';
 import { scan } from '@orgtrace/scanner';
+import { SalesforceService } from '@orgtrace/salesforce-api';
 
 import type { CacheStore } from './cache/CacheStore';
 import { generateImpactMarkdown } from './reportMarkdown';
@@ -14,8 +15,13 @@ export interface AnalyzeComponentInput {
 export class OrgTraceService {
   private lastResult: DependencyResult | undefined;
   private lastResults: DependencyResult[] = [];
+  private readonly sfService: SalesforceService;
+  private readonly onEnrichmentEmitter = new vscode.EventEmitter<DependencyResult>();
+  public readonly onEnrichment = this.onEnrichmentEmitter.event;
 
-  constructor(private readonly cache: CacheStore) {}
+  constructor(private readonly cache: CacheStore) {
+    this.sfService = new SalesforceService();
+  }
 
   async analyzeComponent(input: AnalyzeComponentInput): Promise<DependencyResult> {
     const cacheKey = `${input.projectPath}:${input.target.type}:${input.target.apiName}`;
@@ -53,8 +59,48 @@ export class OrgTraceService {
     this.cache.set(cacheKey, result);
     this.lastResult = result;
     this.lastResults = [result];
+
+    // Trigger async enrichment
+    void this.enrichWithOrgData(result, input.projectPath);
+
     return result;
   }
+
+  private async enrichWithOrgData(result: DependencyResult, projectPath: string): Promise<void> {
+    try {
+      const initialized = await this.sfService.init(projectPath);
+      if (!initialized) return;
+
+      const enrichment = await this.sfService.fetchComponentDetails(
+        result.target.apiName,
+        result.target.type
+      );
+
+      if (enrichment) {
+        const enrichedTarget = mergeComponentEnrichment(result.target, enrichment);
+        const enrichedResult: DependencyResult = {
+          ...result,
+          target: enrichedTarget,
+          sources: [...result.sources, 'SalesforceOrg' as any],
+        };
+
+        // Update cache and state
+        const cacheKey = `${projectPath}:${result.target.type}:${result.target.apiName}`;
+        this.cache.set(cacheKey, enrichedResult);
+        
+        if (this.lastResult?.target.apiName === result.target.apiName && 
+            this.lastResult?.target.type === result.target.type) {
+          this.lastResult = enrichedResult;
+        }
+
+        // Notify listeners (WebviewProvider)
+        this.onEnrichmentEmitter.fire(enrichedResult);
+      }
+    } catch (err) {
+      console.error('Enrichment failed:', err);
+    }
+  }
+
 
   setLastResults(results: DependencyResult[]): void {
     this.lastResults = results;

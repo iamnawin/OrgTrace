@@ -15,7 +15,9 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Other"],
+  "categories": [
+    "Other"
+  ],
   "activationEvents": [
     "workspaceContains:**/sfdx-project.json"
   ],
@@ -56,7 +58,9 @@
   },
   "dependencies": {
     "@orgtrace/core": "workspace:*",
-    "@orgtrace/scanner": "workspace:*"
+    "@orgtrace/salesforce-api": "workspace:^",
+    "@orgtrace/scanner": "workspace:*",
+    "@salesforce/core": "^8.31.0"
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0",

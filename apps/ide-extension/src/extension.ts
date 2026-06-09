@@ -11,6 +11,12 @@ export function activate(context: vscode.ExtensionContext): void {
   const cache = new InMemoryCacheStore();
   const service = new OrgTraceService(cache);
   const webviewProvider = new WebviewProvider(context.extensionUri);
+
+  // Handle async enrichment updates
+  service.onEnrichment((enrichedResult) => {
+    void webviewProvider.updateResult(enrichedResult);
+  });
+
   webviewProvider.onExport(() => exportReportCommand(service));
   webviewProvider.onAnalyzeMany(async (targets) => {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];

@@ -32,6 +32,12 @@ export class WebviewProvider {
     panel.reveal(vscode.ViewColumn.Beside);
   }
 
+  async updateResult(result: DependencyResult): Promise<void> {
+    if (this.panel) {
+      void this.panel.webview.postMessage({ type: 'result', result });
+    }
+  }
+
   async showComponentPicker(components: ComponentRef[]): Promise<void> {
     const panel = this.getPanel();
     panel.webview.html = await this.getHtml(panel.webview, { components });

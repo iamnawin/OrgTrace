@@ -12,7 +12,9 @@
       "require": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -21,7 +23,10 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@orgtrace/core": "workspace:*"
+    "@orgtrace/core": "workspace:*",
+    "@salesforce/core": "^8.31.0",
+    "@salesforce/ts-types": "^2.0.12",
+    "jsforce": "^3.10.15"
   },
   "devDependencies": {
     "rimraf": "^5.0.10",
