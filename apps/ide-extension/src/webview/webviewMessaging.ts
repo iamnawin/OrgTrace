@@ -1,12 +1,29 @@
 import type { WebviewToHostMessage } from '../messages';
 
-declare const acquireVsCodeApi:
-  | undefined
-  | (() => {
-      postMessage(message: WebviewToHostMessage): void;
-    });
+interface VsCodeWebviewApi {
+  postMessage(message: WebviewToHostMessage): void;
+}
+
+declare global {
+  var acquireVsCodeApi:
+    | undefined
+    | (() => VsCodeWebviewApi);
+}
+
+let vscodeApi: VsCodeWebviewApi | undefined;
+
+function getVsCodeApi(): VsCodeWebviewApi | undefined {
+  if (vscodeApi) return vscodeApi;
+  if (typeof globalThis.acquireVsCodeApi === 'undefined') return undefined;
+
+  vscodeApi = globalThis.acquireVsCodeApi();
+  return vscodeApi;
+}
 
 export function postWebviewMessage(message: WebviewToHostMessage): void {
-  if (typeof acquireVsCodeApi === 'undefined') return;
-  acquireVsCodeApi().postMessage(message);
+  getVsCodeApi()?.postMessage(message);
+}
+
+export function resetVsCodeApiForTests(): void {
+  vscodeApi = undefined;
 }
