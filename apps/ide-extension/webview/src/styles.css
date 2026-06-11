@@ -154,6 +154,21 @@ button:disabled {
   justify-content: space-between;
 }
 
+.shell > header {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.header-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .batch-summary {
   display: grid;
   gap: 10px;
@@ -607,9 +622,14 @@ input[type='checkbox'] {
   }
 
   .selector-toolbar,
-  .result-panel > header {
+  .result-panel > header,
+  .shell > header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .header-actions {
+    justify-content: flex-start;
   }
 
   .stat-grid {

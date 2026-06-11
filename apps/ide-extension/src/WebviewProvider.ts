@@ -11,6 +11,7 @@ interface WebviewPayload {
 
 export class WebviewProvider {
   private panel: vscode.WebviewPanel | undefined;
+  private lastComponents: ComponentRef[] = [];
   private exportHandler: (() => void | Promise<void>) | undefined;
   private analyzeManyHandler:
     | ((targets: ComponentRef[]) => void | Promise<void>)
@@ -23,8 +24,14 @@ export class WebviewProvider {
   }
 
   async showResults(results: DependencyResult[]): Promise<void> {
+    const isNewPanel = !this.panel;
     const panel = this.getPanel();
-    panel.webview.html = await this.getHtml(panel.webview, { result: results });
+    if (isNewPanel) {
+      panel.webview.html = await this.getHtml(panel.webview, {
+        components: this.lastComponents,
+        result: results,
+      });
+    }
     void panel.webview.postMessage(
       results.length === 1
         ? { type: 'result', result: results[0]! }
@@ -40,8 +47,12 @@ export class WebviewProvider {
   }
 
   async showComponentPicker(components: ComponentRef[]): Promise<void> {
+    this.lastComponents = components;
+    const isNewPanel = !this.panel;
     const panel = this.getPanel();
-    panel.webview.html = await this.getHtml(panel.webview, { components });
+    if (isNewPanel) {
+      panel.webview.html = await this.getHtml(panel.webview, { components });
+    }
     void panel.webview.postMessage({ type: 'componentPicker', components });
     panel.reveal(vscode.ViewColumn.Beside);
   }

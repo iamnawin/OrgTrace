@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import type { ComponentRef, DependencyResult } from '@orgtrace/core';
 
 import { DependencyList } from './DependencyList';
@@ -101,6 +102,11 @@ function ResultPanel({
 export function App({ result, results, components = [] }: AppProps): JSX.Element {
   const allResults = results ?? (result ? [result] : []);
   const firstResult = allResults[0];
+  const [showSelector, setShowSelector] = useState(allResults.length === 0);
+
+  useEffect(() => {
+    setShowSelector(allResults.length === 0);
+  }, [allResults.length]);
 
   function revealResultPanel(resultKey: string): void {
     const panel = document.getElementById(resultPanelId(resultKey));
@@ -113,7 +119,7 @@ export function App({ result, results, components = [] }: AppProps): JSX.Element
     panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  if (components.length > 0 && allResults.length === 0) {
+  if (components.length > 0 && showSelector) {
     return (
       <main className="shell">
         <MetadataSelector components={components} />
@@ -124,13 +130,22 @@ export function App({ result, results, components = [] }: AppProps): JSX.Element
   return (
     <main className="shell">
       <header>
-        <p className="eyebrow">OrgTrace</p>
-        <h1>
-          {allResults.length > 1
-            ? `${allResults.length} component impact analyses`
-            : firstResult?.target.apiName ?? 'Impact analysis'}
-        </h1>
-        {allResults.length === 1 && firstResult ? <RiskBadge risk={firstResult.risk} /> : null}
+        <div>
+          <p className="eyebrow">OrgTrace</p>
+          <h1>
+            {allResults.length > 1
+              ? `${allResults.length} component impact analyses`
+              : firstResult?.target.apiName ?? 'Impact analysis'}
+          </h1>
+        </div>
+        <div className="header-actions">
+          {allResults.length === 1 && firstResult ? <RiskBadge risk={firstResult.risk} /> : null}
+          {components.length > 0 ? (
+            <button type="button" onClick={() => setShowSelector(true)}>
+              New analysis
+            </button>
+          ) : null}
+        </div>
       </header>
       {allResults.length ? (
         <>
