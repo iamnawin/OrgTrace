@@ -1,6 +1,6 @@
 import type { DependencyReference } from '@orgtrace/core';
+import { FilePathButton } from './FilePathButton';
 import { groupReferencesBySourceType } from './referenceGroups';
-import { postWebviewMessage } from './webviewMessaging';
 
 export interface ReferenceTableProps {
   references: DependencyReference[];
@@ -45,13 +45,11 @@ export function ReferenceTable({
                     <td>{reference.relationshipType}</td>
                     <td>
                       {filePath ? (
-                        <button
-                          className="link-button"
-                          type="button"
-                          onClick={() => postWebviewMessage({ type: 'openInEditor', filePath, ...(lineNumber ? { lineNumber } : {}) })}
-                        >
-                          {location}
-                        </button>
+                        <FilePathButton
+                          filePath={filePath}
+                          label={location}
+                          lineNumber={lineNumber}
+                        />
                       ) : (
                         'Unknown'
                       )}

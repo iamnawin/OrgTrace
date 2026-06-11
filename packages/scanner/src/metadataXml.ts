@@ -46,6 +46,15 @@ export function extractMetadataDetails(content: string): {
   const label = content.match(/<label>(.*?)<\/label>/)?.[1];
   const description = content.match(/<description>(.*?)<\/description>/)?.[1];
   const status = content.match(/<status>(.*?)<\/status>/)?.[1];
+  const details: {
+    label?: string;
+    description?: string;
+    status?: string;
+  } = {};
 
-  return { label, description, status };
+  if (label !== undefined) details.label = label;
+  if (description !== undefined) details.description = description;
+  if (status !== undefined) details.status = status;
+
+  return details;
 }

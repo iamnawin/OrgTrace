@@ -1,4 +1,5 @@
 import type { ComponentRef } from '@orgtrace/core';
+import { FilePathButton } from './FilePathButton';
 
 export function ComponentDetails({ target }: { target: ComponentRef }): JSX.Element {
   const details = [
@@ -6,7 +7,6 @@ export function ComponentDetails({ target }: { target: ComponentRef }): JSX.Elem
     { label: 'Metadata Type', value: target.type },
     { label: 'Label', value: target.label || 'N/A' },
     { label: 'Description', value: target.description || 'N/A' },
-    { label: 'File Path', value: target.filePath || 'N/A' },
     { label: 'Status', value: target.status || 'N/A' },
     { label: 'Namespace', value: target.namespace || 'N/A' },
     { label: 'Source', value: 'Local Scan' },
@@ -26,6 +26,12 @@ export function ComponentDetails({ target }: { target: ComponentRef }): JSX.Elem
             <span className="detail-value">{value}</span>
           </div>
         ))}
+        <div className="detail-item">
+          <span className="detail-label">File Path</span>
+          <span className="detail-value">
+            {target.filePath ? <FilePathButton filePath={target.filePath} /> : 'N/A'}
+          </span>
+        </div>
       </div>
       <style>{`
         .details-grid {

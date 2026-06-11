@@ -7,6 +7,7 @@ import { ReferenceTable } from './ReferenceTable';
 import { RiskBadge } from './RiskBadge';
 import { ComponentDetails } from './ComponentDetails';
 import { RelationshipDiagram } from './RelationshipDiagram';
+import { RiskExplanation } from './RiskExplanation';
 
 export interface AppProps {
   result?: DependencyResult;
@@ -33,6 +34,8 @@ function ResultPanel({ result }: { result: DependencyResult }): JSX.Element {
           ))}
         </ul>
       </section>
+
+      <RiskExplanation result={result} />
 
       <RelationshipDiagram result={result} />
 

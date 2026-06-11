@@ -149,6 +149,117 @@ button:disabled {
   color: color-mix(in srgb, var(--ot-red) 82%, var(--ot-text));
 }
 
+.risk-explanation {
+  display: grid;
+  gap: 12px;
+}
+
+.risk-explanation > header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.risk-explanation > header p {
+  color: var(--ot-muted);
+  font-size: 13px;
+}
+
+.risk-total {
+  align-items: center;
+  border-radius: 7px;
+  display: inline-flex;
+  font-size: 24px;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 46px;
+  min-width: 58px;
+  padding: 8px 12px;
+}
+
+.risk-total[data-level='Low'] {
+  background: color-mix(in srgb, var(--ot-green) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ot-green) 34%, var(--ot-border));
+}
+
+.risk-total[data-level='Medium'] {
+  background: color-mix(in srgb, var(--ot-amber) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ot-amber) 34%, var(--ot-border));
+}
+
+.risk-total[data-level='High'],
+.risk-total[data-level='Critical'] {
+  background: color-mix(in srgb, var(--ot-red) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ot-red) 34%, var(--ot-border));
+}
+
+.risk-score-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.risk-score-grid > div {
+  background: color-mix(in srgb, var(--ot-blue) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ot-blue) 20%, var(--ot-border));
+  border-radius: 7px;
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+}
+
+.risk-score-grid strong {
+  font-size: 20px;
+}
+
+.risk-score-grid span,
+.risk-contribution small,
+.risk-thresholds span {
+  color: var(--ot-muted);
+  font-size: 12px;
+}
+
+.risk-contributions {
+  display: grid;
+  gap: 6px;
+}
+
+.risk-contribution {
+  align-items: center;
+  border-bottom: 1px solid color-mix(in srgb, var(--ot-border) 70%, transparent);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr auto;
+  padding: 7px 0;
+}
+
+.risk-contribution span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.risk-contribution b {
+  color: color-mix(in srgb, var(--ot-cyan) 80%, var(--ot-text));
+}
+
+.risk-thresholds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.risk-thresholds span {
+  background: color-mix(in srgb, var(--ot-input) 74%, transparent);
+  border: 1px solid var(--ot-border);
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+.risk-recommendations ul {
+  margin-bottom: 0;
+}
+
 .stat-grid {
   display: grid;
   gap: 10px;
@@ -423,6 +534,10 @@ input[type='checkbox'] {
   }
 
   .stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .risk-score-grid {
     grid-template-columns: 1fr;
   }
 

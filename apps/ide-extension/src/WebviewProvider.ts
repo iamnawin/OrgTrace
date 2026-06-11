@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import type { ComponentRef, DependencyResult } from '@orgtrace/core';
+import { preferredFileInDirectory, type DirectoryEntry } from './filePathResolution';
 import type { WebviewToHostMessage } from './messages';
 
 type WebviewInitialPayload = DependencyResult | DependencyResult[];
@@ -90,10 +91,7 @@ export class WebviewProvider {
   }
 
   private async openInEditor(filePath: string, lineNumber?: number): Promise<void> {
-    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-    const uri = workspaceFolder
-      ? vscode.Uri.joinPath(workspaceFolder.uri, filePath)
-      : vscode.Uri.file(filePath);
+    const uri = await this.resolveOpenableFileUri(filePath);
     const document = await vscode.workspace.openTextDocument(uri);
     const editor = await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
 
@@ -102,6 +100,37 @@ export class WebviewProvider {
       editor.selection = new vscode.Selection(position, position);
       editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
     }
+  }
+
+  private uriForPath(filePath: string): vscode.Uri {
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    return workspaceFolder
+      ? vscode.Uri.joinPath(workspaceFolder.uri, filePath)
+      : vscode.Uri.file(filePath);
+  }
+
+  private async resolveOpenableFileUri(filePath: string): Promise<vscode.Uri> {
+    const uri = this.uriForPath(filePath);
+    const stat = await vscode.workspace.fs.stat(uri);
+
+    if ((stat.type & vscode.FileType.Directory) === 0) {
+      return uri;
+    }
+
+    const entries = await vscode.workspace.fs.readDirectory(uri);
+    const preferredPath = preferredFileInDirectory(
+      filePath,
+      entries.map(([name, type]): DirectoryEntry => ({
+        name,
+        type: (type & vscode.FileType.Directory) === 0 ? 'file' : 'directory',
+      })),
+    );
+
+    if (!preferredPath) {
+      throw new Error(`No openable files found in ${filePath}`);
+    }
+
+    return this.uriForPath(preferredPath);
   }
 
   private async getHtml(

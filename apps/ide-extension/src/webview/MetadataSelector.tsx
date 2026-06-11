@@ -1,24 +1,49 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ComponentRef, MetadataType } from '@orgtrace/core';
 import { displayFor } from '../commands/componentPicks';
+import { FilePathButton } from './FilePathButton';
 import { postWebviewMessage } from './webviewMessaging';
 
 interface MetadataSelectorProps {
   components: ComponentRef[];
 }
 
-interface TypeGroup {
+export interface TypeGroup {
   type: MetadataType;
   label: string;
   components: ComponentRef[];
 }
 
-function keyFor(component: ComponentRef): string {
+export interface MetadataSelectorState {
+  activeType: MetadataType | undefined;
+  selectedKeys: Set<string>;
+}
+
+export function keyFor(component: ComponentRef): string {
   return `${component.type}:${component.apiName}`;
 }
 
 function normalize(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+export function applyTypeSelection(
+  state: MetadataSelectorState,
+  group: TypeGroup,
+  selected: boolean,
+): MetadataSelectorState {
+  const selectedKeys = new Set(state.selectedKeys);
+
+  for (const component of group.components) {
+    const key = keyFor(component);
+    if (selected) selectedKeys.add(key);
+    else selectedKeys.delete(key);
+  }
+
+  return {
+    activeType: group.type,
+    selectedKeys,
+  };
 }
 
 export function MetadataSelector({ components }: MetadataSelectorProps): JSX.Element {
@@ -44,6 +69,12 @@ export function MetadataSelector({ components }: MetadataSelectorProps): JSX.Ele
   const [componentQuery, setComponentQuery] = useState('');
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(() => new Set());
 
+  useEffect(() => {
+    if (!groups.some((group) => group.type === activeType)) {
+      setActiveType(groups[0]?.type);
+    }
+  }, [activeType, groups]);
+
   const selectedComponents = useMemo(
     () => components.filter((component) => selectedKeys.has(keyFor(component))),
     [components, selectedKeys],
@@ -62,14 +93,13 @@ export function MetadataSelector({ components }: MetadataSelectorProps): JSX.Ele
   });
 
   const setTypeSelection = (group: TypeGroup, selected: boolean): void => {
+    setActiveType(group.type);
     setSelectedKeys((previous) => {
-      const next = new Set(previous);
-      for (const component of group.components) {
-        const key = keyFor(component);
-        if (selected) next.add(key);
-        else next.delete(key);
-      }
-      return next;
+      return applyTypeSelection(
+        { activeType: group.type, selectedKeys: previous },
+        group,
+        selected,
+      ).selectedKeys;
     });
   };
 
@@ -187,7 +217,11 @@ export function MetadataSelector({ components }: MetadataSelectorProps): JSX.Ele
                 />
                 <span>
                   <strong>{component.label ?? component.apiName}</strong>
-                  {component.filePath ? <small>{component.filePath}</small> : null}
+                  {component.filePath ? (
+                    <small>
+                      <FilePathButton filePath={component.filePath} />
+                    </small>
+                  ) : null}
                 </span>
               </label>
             ))}

@@ -1,12 +1,16 @@
 import { ComponentRef } from './types';
 
+type ComponentEnrichment = {
+  [Key in keyof ComponentRef]?: ComponentRef[Key] | undefined;
+};
+
 /**
  * Merges org enrichment data into an existing ComponentRef.
  * Does not overwrite local-only fields like filePath.
  */
 export function mergeComponentEnrichment(
   base: ComponentRef,
-  enrichment: Partial<ComponentRef> | null
+  enrichment: ComponentEnrichment | null
 ): ComponentRef {
   if (!enrichment) return base;
 
