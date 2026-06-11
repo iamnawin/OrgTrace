@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { DependencyReference, DependencyResult } from '@orgtrace/core';
 
-import { buildResultSummaryRows, shouldCollapseResult } from './resultSummary';
+import { buildResultSummaryRows, resultPanelId, shouldCollapseResult } from './resultSummary';
 
 function result(
   apiName: string,
@@ -49,10 +49,24 @@ describe('result summary helpers', () => {
       result('mediumComponent', 30, [reference('FlowA')]),
       result('anotherLow', 0),
     ])).toEqual([
-      expect.objectContaining({ apiName: 'mediumComponent', score: 30, usedByCount: 1 }),
-      expect.objectContaining({ apiName: 'anotherLow', score: 0 }),
-      expect.objectContaining({ apiName: 'lowComponent', score: 0 }),
+      expect.objectContaining({
+        apiName: 'mediumComponent',
+        panelId: 'result-LightningComponentBundle-mediumComponent',
+        score: 30,
+        usedByCount: 1,
+      }),
+      expect.objectContaining({ apiName: 'anotherLow', panelId: 'result-LightningComponentBundle-anotherLow', score: 0 }),
+      expect.objectContaining({ apiName: 'lowComponent', panelId: 'result-LightningComponentBundle-lowComponent', score: 0 }),
     ]);
+  });
+
+  it('creates stable result panel ids from keys and results', () => {
+    expect(resultPanelId('LightningComponentBundle:accountHierarchyAction')).toBe(
+      'result-LightningComponentBundle-accountHierarchyAction',
+    );
+    expect(resultPanelId(result('accountHierarchyAction', 0))).toBe(
+      'result-LightningComponentBundle-accountHierarchyAction',
+    );
   });
 
   it('collapses only zero-impact low-risk results', () => {

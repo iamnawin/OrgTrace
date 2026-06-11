@@ -9,7 +9,7 @@ import { ComponentDetails } from './ComponentDetails';
 import { RelationshipDiagram } from './RelationshipDiagram';
 import { RiskExplanation } from './RiskExplanation';
 import { BatchResultSummary } from './BatchResultSummary';
-import { shouldCollapseResult } from './resultSummary';
+import { resultPanelId, shouldCollapseResult } from './resultSummary';
 
 export interface AppProps {
   result?: DependencyResult;
@@ -19,10 +19,12 @@ export interface AppProps {
 
 function ResultPanel({
   result,
+  panelId,
   collapsible = false,
   defaultCollapsed = false,
 }: {
   result: DependencyResult;
+  panelId: string;
   collapsible?: boolean;
   defaultCollapsed?: boolean;
 }): JSX.Element {
@@ -81,7 +83,7 @@ function ResultPanel({
 
   if (collapsible) {
     return (
-      <details className="result-panel result-disclosure" open={!defaultCollapsed}>
+      <details className="result-panel result-disclosure" id={panelId} open={!defaultCollapsed}>
         <summary>{header}</summary>
         {body}
       </details>
@@ -89,7 +91,7 @@ function ResultPanel({
   }
 
   return (
-    <article className="result-panel">
+    <article className="result-panel" id={panelId}>
       {header}
       {body}
     </article>
@@ -99,6 +101,17 @@ function ResultPanel({
 export function App({ result, results, components = [] }: AppProps): JSX.Element {
   const allResults = results ?? (result ? [result] : []);
   const firstResult = allResults[0];
+
+  function revealResultPanel(resultKey: string): void {
+    const panel = document.getElementById(resultPanelId(resultKey));
+    if (!panel) return;
+
+    if (panel instanceof HTMLDetailsElement) {
+      panel.open = true;
+    }
+
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
   if (components.length > 0 && allResults.length === 0) {
     return (
@@ -121,12 +134,13 @@ export function App({ result, results, components = [] }: AppProps): JSX.Element
       </header>
       {allResults.length ? (
         <>
-          <BatchResultSummary results={allResults} />
+          <BatchResultSummary onSelectResult={revealResultPanel} results={allResults} />
           {allResults.map((item) => (
             <ResultPanel
               key={`${item.target.type}:${item.target.apiName}`}
               collapsible={allResults.length > 1}
               defaultCollapsed={shouldCollapseResult(item)}
+              panelId={resultPanelId(item)}
               result={item}
             />
           ))}

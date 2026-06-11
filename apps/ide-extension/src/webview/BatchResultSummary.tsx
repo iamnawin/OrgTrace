@@ -5,9 +5,10 @@ import { buildResultSummaryRows } from './resultSummary';
 
 interface BatchResultSummaryProps {
   results: DependencyResult[];
+  onSelectResult?: (resultKey: string) => void;
 }
 
-export function BatchResultSummary({ results }: BatchResultSummaryProps): JSX.Element | null {
+export function BatchResultSummary({ results, onSelectResult }: BatchResultSummaryProps): JSX.Element | null {
   if (results.length <= 1) return null;
 
   const rows = buildResultSummaryRows(results);
@@ -37,8 +38,24 @@ export function BatchResultSummary({ results }: BatchResultSummaryProps): JSX.El
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.key}>
-              <td>{row.apiName}</td>
+            <tr
+              key={row.key}
+              className="summary-row"
+              onClick={() => onSelectResult?.(row.key)}
+            >
+              <td>
+                <button
+                  aria-controls={row.panelId}
+                  className="summary-component-button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onSelectResult?.(row.key);
+                  }}
+                  type="button"
+                >
+                  {row.apiName}
+                </button>
+              </td>
               <td>{row.type}</td>
               <td>
                 <RiskBadge risk={{ level: row.level as DependencyResult['risk']['level'], score: row.score, reasons: [] }} />

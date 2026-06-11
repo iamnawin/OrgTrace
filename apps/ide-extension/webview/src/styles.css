@@ -178,6 +178,30 @@ button:disabled {
   font-weight: 700;
 }
 
+.summary-row {
+  cursor: pointer;
+}
+
+.summary-component-button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 3px;
+  color: var(--ot-text);
+  font: inherit;
+  font-weight: 800;
+  padding: 0;
+  text-align: left;
+}
+
+.summary-component-button:hover,
+.summary-component-button:focus-visible {
+  color: var(--ot-link);
+  filter: none;
+  outline-offset: 3px;
+  text-decoration: underline;
+}
+
 .risk-badge {
   border-radius: 999px;
   display: inline-flex;

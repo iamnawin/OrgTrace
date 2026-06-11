@@ -2,6 +2,7 @@ import type { DependencyResult } from '@orgtrace/core';
 
 export interface ResultSummaryRow {
   key: string;
+  panelId: string;
   apiName: string;
   type: string;
   score: number;
@@ -14,6 +15,11 @@ export function resultKey(result: DependencyResult): string {
   return `${result.target.type}:${result.target.apiName}`;
 }
 
+export function resultPanelId(resultOrKey: DependencyResult | string): string {
+  const key = typeof resultOrKey === 'string' ? resultOrKey : resultKey(resultOrKey);
+  return `result-${key.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+}
+
 export function buildResultSummaryRows(results: DependencyResult[]): ResultSummaryRow[] {
   return [...results]
     .sort((a, b) => {
@@ -22,6 +28,7 @@ export function buildResultSummaryRows(results: DependencyResult[]): ResultSumma
     })
     .map((result) => ({
       key: resultKey(result),
+      panelId: resultPanelId(result),
       apiName: result.target.apiName,
       type: result.target.type,
       score: result.risk.score,
