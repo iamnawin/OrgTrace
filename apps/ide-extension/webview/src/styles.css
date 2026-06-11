@@ -117,10 +117,65 @@ button:disabled {
   gap: 14px;
 }
 
+.result-disclosure {
+  background: transparent;
+  border: 0;
+}
+
+.result-disclosure > summary {
+  cursor: pointer;
+  display: block;
+  list-style: none;
+}
+
+.result-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.result-disclosure > summary > header::after {
+  color: var(--ot-muted);
+  content: 'Collapse';
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.result-disclosure:not([open]) > summary > header::after {
+  content: 'Expand';
+}
+
+.result-disclosure:not([open]) > summary > header {
+  box-shadow: none;
+}
+
 .result-panel > header {
   align-items: center;
   display: flex;
   justify-content: space-between;
+}
+
+.batch-summary {
+  display: grid;
+  gap: 10px;
+}
+
+.batch-summary > header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.batch-summary > header p {
+  color: var(--ot-muted);
+  font-size: 13px;
+}
+
+.batch-summary table {
+  margin-bottom: 0;
+}
+
+.batch-summary td:first-child {
+  font-weight: 700;
 }
 
 .risk-badge {

@@ -8,6 +8,8 @@ import { RiskBadge } from './RiskBadge';
 import { ComponentDetails } from './ComponentDetails';
 import { RelationshipDiagram } from './RelationshipDiagram';
 import { RiskExplanation } from './RiskExplanation';
+import { BatchResultSummary } from './BatchResultSummary';
+import { shouldCollapseResult } from './resultSummary';
 
 export interface AppProps {
   result?: DependencyResult;
@@ -15,17 +17,26 @@ export interface AppProps {
   components?: ComponentRef[];
 }
 
-function ResultPanel({ result }: { result: DependencyResult }): JSX.Element {
-  return (
-    <article className="result-panel">
+function ResultPanel({
+  result,
+  collapsible = false,
+  defaultCollapsed = false,
+}: {
+  result: DependencyResult;
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
+}): JSX.Element {
+  const header = (
       <header>
         <p className="eyebrow">{result.target.type}</p>
         <h2>{result.target.apiName}</h2>
         <RiskBadge risk={result.risk} />
       </header>
-      
+  );
+  const body = (
+    <>
       <ComponentDetails target={result.target} />
-      
+
       <section className="panel">
         <h3>Risk summary</h3>
         <ul>
@@ -65,6 +76,22 @@ function ResultPanel({ result }: { result: DependencyResult }): JSX.Element {
           ))}
         </section>
       ) : null}
+    </>
+  );
+
+  if (collapsible) {
+    return (
+      <details className="result-panel result-disclosure" open={!defaultCollapsed}>
+        <summary>{header}</summary>
+        {body}
+      </details>
+    );
+  }
+
+  return (
+    <article className="result-panel">
+      {header}
+      {body}
     </article>
   );
 }
@@ -94,8 +121,14 @@ export function App({ result, results, components = [] }: AppProps): JSX.Element
       </header>
       {allResults.length ? (
         <>
+          <BatchResultSummary results={allResults} />
           {allResults.map((item) => (
-            <ResultPanel key={`${item.target.type}:${item.target.apiName}`} result={item} />
+            <ResultPanel
+              key={`${item.target.type}:${item.target.apiName}`}
+              collapsible={allResults.length > 1}
+              defaultCollapsed={shouldCollapseResult(item)}
+              result={item}
+            />
           ))}
           <ExportButton />
         </>
