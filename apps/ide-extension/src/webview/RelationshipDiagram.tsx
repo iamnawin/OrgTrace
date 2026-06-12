@@ -1,24 +1,78 @@
 import type { DependencyResult } from '@orgtrace/core';
+import { displayFor } from '../commands/componentPicks';
+import { openInEditorMessage } from './FilePathButton';
+import { postWebviewMessage } from './webviewMessaging';
+import { buildDiagramClusters, type DiagramCluster, type DiagramNode } from './relationshipDiagramModel';
+
+function DiagramNodeView({ node }: { node: DiagramNode }): JSX.Element {
+  const body = (
+    <>
+      <span className="node-name">{node.component.apiName}</span>
+      <span className="node-meta">
+        {node.relationships.join(', ')}
+        {node.referenceCount > 1 ? ` · ×${node.referenceCount}` : ''}
+      </span>
+    </>
+  );
+
+  if (node.location) {
+    const location = node.location;
+    return (
+      <button
+        className="diagram-node"
+        title={node.description}
+        type="button"
+        onClick={() =>
+          postWebviewMessage(openInEditorMessage(location.filePath, location.lineNumber))
+        }
+      >
+        {body}
+      </button>
+    );
+  }
+
+  return (
+    <div className="diagram-node" title={node.description}>
+      {body}
+    </div>
+  );
+}
+
+function DiagramClusters({ clusters }: { clusters: DiagramCluster[] }): JSX.Element {
+  return (
+    <>
+      {clusters.map((cluster) => (
+        <div key={cluster.type} className="diagram-cluster">
+          <span className="cluster-label">
+            {displayFor(cluster.type).label} ({cluster.nodes.length})
+          </span>
+          <div className="cluster-nodes">
+            {cluster.nodes.map((node) => (
+              <DiagramNodeView key={node.component.apiName} node={node} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
 
 export function RelationshipDiagram({ result }: { result: DependencyResult }): JSX.Element {
   const { target, references, dependencies } = result;
 
-  // Limit to 5 for the diagram to keep it clean
-  const usedBy = references.slice(0, 5);
-  const uses = dependencies.slice(0, 5);
+  const usedByClusters = buildDiagramClusters(references, 'inbound');
+  const usesClusters = buildDiagramClusters(dependencies, 'outbound');
+  const usedByCount = usedByClusters.reduce((sum, cluster) => sum + cluster.nodes.length, 0);
+  const usesCount = usesClusters.reduce((sum, cluster) => sum + cluster.nodes.length, 0);
 
   return (
     <section className="panel relationship-diagram">
       <h3>Relationship Diagram</h3>
       <div className="diagram-container">
-        {usedBy.length > 0 && (
+        {usedByClusters.length > 0 && (
           <div className="diagram-level used-by-level">
-            {usedBy.map((ref, i) => (
-              <div key={i} className="diagram-node">
-                <span className="node-type">{ref.source.type}</span>
-                <span className="node-name">{ref.source.apiName}</span>
-              </div>
-            ))}
+            <span className="level-label">Used by {usedByCount} component{usedByCount === 1 ? '' : 's'}</span>
+            <DiagramClusters clusters={usedByClusters} />
             <div className="connector-vertical"></div>
           </div>
         )}
@@ -30,15 +84,11 @@ export function RelationshipDiagram({ result }: { result: DependencyResult }): J
           </div>
         </div>
 
-        {uses.length > 0 && (
+        {usesClusters.length > 0 && (
           <div className="diagram-level uses-level">
             <div className="connector-vertical"></div>
-            {uses.map((dep, i) => (
-              <div key={i} className="diagram-node">
-                <span className="node-type">{dep.target.type}</span>
-                <span className="node-name">{dep.target.apiName}</span>
-              </div>
-            ))}
+            <span className="level-label">Uses {usesCount} component{usesCount === 1 ? '' : 's'}</span>
+            <DiagramClusters clusters={usesClusters} />
           </div>
         )}
       </div>
@@ -56,10 +106,36 @@ export function RelationshipDiagram({ result }: { result: DependencyResult }): J
         }
         .diagram-level {
           display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          position: relative;
+          width: 100%;
+        }
+        .level-label {
+          font-size: 0.8em;
+          font-weight: 600;
+          opacity: 0.75;
+          text-transform: uppercase;
+        }
+        .diagram-cluster {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+          width: 100%;
+        }
+        .cluster-label {
+          font-size: 0.75em;
+          opacity: 0.7;
+        }
+        .cluster-nodes {
+          display: flex;
           flex-wrap: wrap;
           justify-content: center;
-          gap: 12px;
-          position: relative;
+          gap: 8px;
+          max-height: 220px;
+          overflow: auto;
           width: 100%;
         }
         .diagram-node {
@@ -67,11 +143,20 @@ export function RelationshipDiagram({ result }: { result: DependencyResult }): J
           background: var(--vscode-sideBar-background);
           border: 1px solid var(--vscode-panel-border);
           border-radius: 4px;
+          color: inherit;
           display: flex;
           flex-direction: column;
           align-items: center;
+          font: inherit;
           min-width: 120px;
           font-size: 0.9em;
+          text-align: center;
+        }
+        button.diagram-node {
+          cursor: pointer;
+        }
+        button.diagram-node:hover {
+          border-color: var(--vscode-button-background);
         }
         .target-node {
           border: 2px solid var(--vscode-button-background);
@@ -81,6 +166,10 @@ export function RelationshipDiagram({ result }: { result: DependencyResult }): J
           font-size: 0.75em;
           opacity: 0.7;
           text-transform: uppercase;
+        }
+        .node-meta {
+          font-size: 0.75em;
+          opacity: 0.7;
         }
         .node-name {
           font-weight: 600;
