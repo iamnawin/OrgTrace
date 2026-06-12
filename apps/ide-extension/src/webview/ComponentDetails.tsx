@@ -43,6 +43,10 @@ export function ComponentDetails({ target }: { target: ComponentRef }): JSX.Elem
         .detail-item {
           display: flex;
           flex-direction: column;
+          min-width: 0;
+        }
+        .detail-value .link-button {
+          max-width: 100%;
         }
         .detail-label {
           font-size: 0.85em;
