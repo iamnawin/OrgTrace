@@ -64,14 +64,14 @@ export function MetadataSelector({ components }: MetadataSelectorProps): JSX.Ele
       .sort((a, b) => a.label.localeCompare(b.label));
   }, [components]);
 
-  const [activeType, setActiveType] = useState<MetadataType | undefined>(groups[0]?.type);
+  const [activeType, setActiveType] = useState<MetadataType | undefined>(undefined);
   const [typeQuery, setTypeQuery] = useState('');
   const [componentQuery, setComponentQuery] = useState('');
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
-    if (!groups.some((group) => group.type === activeType)) {
-      setActiveType(groups[0]?.type);
+    if (activeType && !groups.some((group) => group.type === activeType)) {
+      setActiveType(undefined);
     }
   }, [activeType, groups]);
 
@@ -79,7 +79,7 @@ export function MetadataSelector({ components }: MetadataSelectorProps): JSX.Ele
     () => components.filter((component) => selectedKeys.has(keyFor(component))),
     [components, selectedKeys],
   );
-  const activeGroup = groups.find((group) => group.type === activeType) ?? groups[0];
+  const activeGroup = groups.find((group) => group.type === activeType);
   const filteredGroups = groups.filter((group) =>
     normalize(group.label).includes(normalize(typeQuery)),
   );
@@ -160,17 +160,12 @@ export function MetadataSelector({ components }: MetadataSelectorProps): JSX.Ele
                   type="button"
                   onClick={() => setActiveType(group.type)}
                 >
-                  <input
-                    type="checkbox"
-                    checked={selectedCount === group.components.length}
-                    ref={(input) => {
-                      if (input) input.indeterminate = selectedCount > 0 && selectedCount < group.components.length;
-                    }}
-                    onClick={(event) => event.stopPropagation()}
-                    onChange={(event) => setTypeSelection(group, event.target.checked)}
-                  />
                   <span>{group.label}</span>
-                  <span className="row-count">{group.components.length}</span>
+                  <span className="row-count">
+                    {selectedCount > 0
+                      ? `${selectedCount}/${group.components.length}`
+                      : group.components.length}
+                  </span>
                 </button>
               );
             })}
@@ -197,35 +192,41 @@ export function MetadataSelector({ components }: MetadataSelectorProps): JSX.Ele
               </button>
             </div>
           </header>
-          <input
-            aria-label="Filter components"
-            className="selector-search"
-            placeholder={`Filter ${activeGroup?.label ?? 'components'}...`}
-            value={componentQuery}
-            onChange={(event) => setComponentQuery(event.target.value)}
-          />
-          <div className="selector-list">
-            {filteredComponents.map((component) => (
-              <label
-                key={keyFor(component)}
-                className={`component-row${selectedKeys.has(keyFor(component)) ? ' selected' : ''}`}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedKeys.has(keyFor(component))}
-                  onChange={() => toggleComponent(component)}
-                />
-                <span>
-                  <strong>{component.label ?? component.apiName}</strong>
-                  {component.filePath ? (
-                    <small>
-                      <FilePathButton filePath={component.filePath} />
-                    </small>
-                  ) : null}
-                </span>
-              </label>
-            ))}
-          </div>
+          {activeGroup ? (
+            <>
+              <input
+                aria-label="Filter components"
+                className="selector-search"
+                placeholder={`Filter ${activeGroup.label}...`}
+                value={componentQuery}
+                onChange={(event) => setComponentQuery(event.target.value)}
+              />
+              <div className="selector-list">
+                {filteredComponents.map((component) => (
+                  <label
+                    key={keyFor(component)}
+                    className={`component-row${selectedKeys.has(keyFor(component)) ? ' selected' : ''}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedKeys.has(keyFor(component))}
+                      onChange={() => toggleComponent(component)}
+                    />
+                    <span>
+                      <strong>{component.label ?? component.apiName}</strong>
+                      {component.filePath ? (
+                        <small>
+                          <FilePathButton filePath={component.filePath} />
+                        </small>
+                      ) : null}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="pane-hint">Select a metadata type to view and choose its components.</p>
+          )}
         </section>
       </div>
     </section>

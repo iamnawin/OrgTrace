@@ -57,6 +57,23 @@ describe('webview state updates', () => {
     expect(next.results).toEqual([expect.objectContaining({ target: expect.objectContaining({ apiName: 'FlowB' }) })]);
   });
 
+  it('returns a new results array when the same target is re-analyzed', () => {
+    const state: WebviewState = {
+      components: [component('FlowA')],
+      results: [result('FlowA')],
+    };
+    const next = applyHostMessage(state, {
+      result: result('FlowA', 30),
+      type: 'result',
+    });
+
+    // The webview switches from selector back to results on array identity,
+    // so an in-place replacement must still produce a fresh array.
+    expect(next.results).not.toBe(state.results);
+    expect(next.results).toHaveLength(1);
+    expect(next.results[0]?.risk.score).toBe(30);
+  });
+
   it('clears results only when the host sends a fresh component picker', () => {
     const next = applyHostMessage(
       {

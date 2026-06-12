@@ -559,6 +559,10 @@ tbody tr:hover {
   background: color-mix(in srgb, var(--ot-blue) 10%, transparent);
 }
 
+.type-row {
+  grid-template-columns: 1fr auto;
+}
+
 .type-row.active {
   background: color-mix(in srgb, var(--ot-blue) 16%, transparent);
   border-color: color-mix(in srgb, var(--ot-blue) 42%, var(--ot-border));
@@ -587,6 +591,12 @@ tbody tr:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.pane-hint {
+  color: var(--ot-muted);
+  font-size: 13px;
+  margin: 12px 0 0;
 }
 
 .component-row small,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ComponentRef, DependencyResult } from '@orgtrace/core';
 
 import { DependencyList } from './DependencyList';
@@ -100,13 +100,18 @@ function ResultPanel({
 }
 
 export function App({ result, results, components = [] }: AppProps): JSX.Element {
-  const allResults = results ?? (result ? [result] : []);
+  const allResults = useMemo(
+    () => results ?? (result ? [result] : []),
+    [result, results],
+  );
   const firstResult = allResults[0];
   const [showSelector, setShowSelector] = useState(allResults.length === 0);
 
+  // Track array identity, not just length: re-analyzing the same component
+  // replaces the result in place, and the view must still switch back.
   useEffect(() => {
     setShowSelector(allResults.length === 0);
-  }, [allResults.length]);
+  }, [allResults]);
 
   function revealResultPanel(resultKey: string): void {
     const panel = document.getElementById(resultPanelId(resultKey));
