@@ -27,6 +27,10 @@ function normalize(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
+export function fileNameFor(filePath: string): string {
+  return filePath.split(/[\\/]/).pop() ?? filePath;
+}
+
 export function applyTypeSelection(
   state: MetadataSelectorState,
   group: TypeGroup,
@@ -130,7 +134,7 @@ export function MetadataSelector({ components }: MetadataSelectorProps): JSX.Ele
         </button>
       </div>
 
-      <div className="selector-grid">
+      <div className={`selector-grid${activeGroup ? '' : ' single'}`}>
         <section className="selector-pane">
           <header className="pane-header">
             <h2>Metadata Types</h2>
@@ -138,7 +142,14 @@ export function MetadataSelector({ components }: MetadataSelectorProps): JSX.Ele
               <button type="button" onClick={() => setSelectedKeys(new Set(components.map(keyFor)))}>
                 Select All
               </button>
-              <button type="button" onClick={() => setSelectedKeys(new Set())}>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedKeys(new Set());
+                  setActiveType(undefined);
+                  setComponentQuery('');
+                }}
+              >
                 Clear All
               </button>
             </div>
@@ -158,7 +169,10 @@ export function MetadataSelector({ components }: MetadataSelectorProps): JSX.Ele
                   key={group.type}
                   className={`type-row${group.type === activeGroup?.type ? ' active' : ''}${selectedCount > 0 ? ' selected' : ''}`}
                   type="button"
-                  onClick={() => setActiveType(group.type)}
+                  onClick={() => {
+                    setComponentQuery('');
+                    setActiveType((previous) => (previous === group.type ? undefined : group.type));
+                  }}
                 >
                   <span>{group.label}</span>
                   <span className="row-count">
@@ -172,62 +186,53 @@ export function MetadataSelector({ components }: MetadataSelectorProps): JSX.Ele
           </div>
         </section>
 
-        <section className="selector-pane">
-          <header className="pane-header">
-            <h2>{activeGroup?.label ?? 'Components'}</h2>
-            <div className="pane-actions">
-              <button
-                type="button"
-                disabled={!activeGroup}
-                onClick={() => activeGroup ? setTypeSelection(activeGroup, true) : undefined}
-              >
-                Select All
-              </button>
-              <button
-                type="button"
-                disabled={!activeGroup}
-                onClick={() => activeGroup ? setTypeSelection(activeGroup, false) : undefined}
-              >
-                Clear All
-              </button>
-            </div>
-          </header>
-          {activeGroup ? (
-            <>
-              <input
-                aria-label="Filter components"
-                className="selector-search"
-                placeholder={`Filter ${activeGroup.label}...`}
-                value={componentQuery}
-                onChange={(event) => setComponentQuery(event.target.value)}
-              />
-              <div className="selector-list">
-                {filteredComponents.map((component) => (
-                  <label
-                    key={keyFor(component)}
-                    className={`component-row${selectedKeys.has(keyFor(component)) ? ' selected' : ''}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedKeys.has(keyFor(component))}
-                      onChange={() => toggleComponent(component)}
-                    />
-                    <span>
-                      <strong>{component.label ?? component.apiName}</strong>
-                      {component.filePath ? (
-                        <small>
-                          <FilePathButton filePath={component.filePath} />
-                        </small>
-                      ) : null}
-                    </span>
-                  </label>
-                ))}
+        {activeGroup ? (
+          <section className="selector-pane">
+            <header className="pane-header">
+              <h2>{activeGroup.label}</h2>
+              <div className="pane-actions">
+                <button type="button" onClick={() => setTypeSelection(activeGroup, true)}>
+                  Select All
+                </button>
+                <button type="button" onClick={() => setTypeSelection(activeGroup, false)}>
+                  Clear All
+                </button>
               </div>
-            </>
-          ) : (
-            <p className="pane-hint">Select a metadata type to view and choose its components.</p>
-          )}
-        </section>
+            </header>
+            <input
+              aria-label="Filter components"
+              className="selector-search"
+              placeholder={`Filter ${activeGroup.label}...`}
+              value={componentQuery}
+              onChange={(event) => setComponentQuery(event.target.value)}
+            />
+            <div className="selector-list">
+              {filteredComponents.map((component) => (
+                <label
+                  key={keyFor(component)}
+                  className={`component-row${selectedKeys.has(keyFor(component)) ? ' selected' : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedKeys.has(keyFor(component))}
+                    onChange={() => toggleComponent(component)}
+                  />
+                  <span>
+                    <strong>{component.label ?? component.apiName}</strong>
+                    {component.filePath ? (
+                      <small>
+                        <FilePathButton
+                          filePath={component.filePath}
+                          label={fileNameFor(component.filePath)}
+                        />
+                      </small>
+                    ) : null}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
     </section>
   );

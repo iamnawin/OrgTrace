@@ -28,7 +28,7 @@ export function FilePathButton({
   return (
     <button
       className="link-button"
-      title={display}
+      title={lineNumber ? `${filePath}:${lineNumber}` : filePath}
       type="button"
       onClick={(event) => {
         event.preventDefault();

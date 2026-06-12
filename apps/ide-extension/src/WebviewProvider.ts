@@ -104,7 +104,8 @@ export class WebviewProvider {
   private async openInEditor(filePath: string, lineNumber?: number): Promise<void> {
     const uri = await this.resolveOpenableFileUri(filePath);
     const document = await vscode.workspace.openTextDocument(uri);
-    const editor = await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+    // Open next to the OrgTrace panel so navigation never covers it.
+    const editor = await vscode.window.showTextDocument(document, vscode.ViewColumn.Beside);
 
     if (lineNumber && lineNumber > 0) {
       const position = new vscode.Position(lineNumber - 1, 0);

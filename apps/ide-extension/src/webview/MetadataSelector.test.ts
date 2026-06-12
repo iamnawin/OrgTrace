@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ComponentRef } from '@orgtrace/core';
 
-import { applyTypeSelection, keyFor, type TypeGroup } from './MetadataSelector';
+import { applyTypeSelection, fileNameFor, keyFor, type TypeGroup } from './MetadataSelector';
 
 const flow: ComponentRef = {
   apiName: 'Account_Alert_Message',
@@ -44,5 +44,12 @@ describe('MetadataSelector state helpers', () => {
 
     expect(state.activeType).toBe('LightningComponentBundle');
     expect(state.selectedKeys.size).toBe(0);
+  });
+
+  it('shows only the file name for a component path', () => {
+    expect(fileNameFor('force-app/main/default/classes/AccountInsertionClass.cls')).toBe(
+      'AccountInsertionClass.cls',
+    );
+    expect(fileNameFor('force-app\\main\\default\\lwc\\accountAlertPanel')).toBe('accountAlertPanel');
   });
 });

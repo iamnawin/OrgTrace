@@ -473,6 +473,10 @@ tbody tr:hover {
   min-height: min(680px, calc(100vh - 126px));
 }
 
+.selector-grid.single {
+  grid-template-columns: minmax(280px, 520px);
+}
+
 .selector-pane {
   background: var(--ot-panel);
   border: 1px solid var(--ot-border);
@@ -488,7 +492,7 @@ tbody tr:hover {
   border-top-color: color-mix(in srgb, var(--ot-pink) 50%, var(--ot-border));
 }
 
-.selector-pane:last-child {
+.selector-pane:last-child:not(:only-child) {
   border-top-color: color-mix(in srgb, var(--ot-cyan) 50%, var(--ot-border));
 }
 
@@ -591,12 +595,6 @@ tbody tr:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.pane-hint {
-  color: var(--ot-muted);
-  font-size: 13px;
-  margin: 12px 0 0;
 }
 
 .component-row small,
